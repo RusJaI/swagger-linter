@@ -6,6 +6,7 @@ import { bundleAndLoadRuleset } from "@stoplight/spectral-ruleset-bundler/with-l
 import Parsers from "@stoplight/spectral-parsers";
 import spectralCore from "@stoplight/spectral-core";
 import Table from "cli-table";
+import chalk from "chalk";
 const { Spectral, Document } = spectralCore;
 import spectralRuntime from "@stoplight/spectral-runtime";
 const { fetch } = spectralRuntime;
@@ -56,11 +57,11 @@ spectral.run(myDocument).then(result => {
     result.forEach(r => { delete r.code; delete r.severity; delete r.range; });
 
     if (result.length > 0) {
-        console.log("\n---------------------------------- API Definition Validation Failed ----------------------------------\n");
-        console.log(result.length + " error(s) found in the API definition\n");
+        console.log(chalk.red.bold("\nValidation Failed\n"));
+        console.log(chalk.red.bold(result.length) + chalk.red(" error(s) found in the API definition\n"));
         result.forEach(r => table.push([r.path, r.message]));
         console.log(table.toString());
     } else {
-        console.log("\n---------------------------------- API Definition Validation Passed ----------------------------------\n");
+        console.log(chalk.green.bold("\nValidation Passed\n"));
     }
 });
