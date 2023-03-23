@@ -1,0 +1,30 @@
+{
+  "name": "swagger-linter",
+  "version": "1.0.0",
+  "description": "Validate Swagger or OpenAPI definitions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashera96/swagger-linter.git"
+  },
+  "keywords": [
+    "Swagger",
+    "OpenAPI",
+    "JSON",
+    "YAML",
+    "Validator",
+    "Parser"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@stoplight/spectral-core": "^1.16.1",
+    "@stoplight/spectral-ruleset-bundler": "^1.5.1",
+    "cli-table": "^0.3.11",
+    "commander": "^10.0.0"
+  }
+}

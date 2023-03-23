@@ -1,0 +1,4 @@
+extends:
+  - spectral:oas
+rules:
+  no-$ref-siblings: warn # error is the default value
