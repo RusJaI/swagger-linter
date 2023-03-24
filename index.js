@@ -25,8 +25,18 @@ const {
     swaggerFile
 } = program.opts();
 
-// load API specification file that was provided as a command line argument
-const apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
+// Load API specification file that was provided as a command line argument
+let apiDefinition;
+try {
+    apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
+} catch (err) {
+    if (err.code === "ENOENT") {
+        console.error(chalk.red.bold("Error: ") + "File not found: " + swaggerFile);
+    } else {
+        console.error(chalk.red.bold("Error: ") + "Unable to read file: " + swaggerFile);
+    }
+    process.exit(1);
+}
 
 const table = new Table({
     head: ["Path", "Error Message"],
