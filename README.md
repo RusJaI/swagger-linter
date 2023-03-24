@@ -12,4 +12,6 @@ Optionally, clone this repo and run the following commnds
 
 `npm i`
 
+`npm link`
+
 `swagger-linter -f [path to API definition JSON or YAML]`
