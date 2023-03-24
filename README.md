@@ -12,4 +12,4 @@ Optionally, clone this repo and run the following commnds
 
 `npm i`
 
-`node index.js -f [path to API definition JSON or YAML]`
+`swagger-linter -f [path to API definition JSON or YAML]`

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Validate Swagger or OpenAPI definitions",
   "main": "index.js",
+  "bin": {
+    "swagger-linter": "./index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
