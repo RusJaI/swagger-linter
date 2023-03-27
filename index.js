@@ -39,7 +39,7 @@ try {
 }
 
 const table = new Table({
-    head: ["Path", "Error Message"],
+    head: ["Rule", "Path", "Error Message"],
     style: {
         head: ["cyan"],
         border: ["grey"]
@@ -66,12 +66,12 @@ spectral.run(myDocument).then(result => {
     result = result.filter((r, i, a) => a.findIndex(t => r.path.includes(t.path)) === i);
 
     // Remove code, severity and range fields from the result as those add no value to the output
-    result.forEach(r => { delete r.code; delete r.severity; delete r.range; });
+    result.forEach(r => { delete r.severity; delete r.range; });
 
     if (result.length > 0) {
         console.log(chalk.red.bold("\nValidation Failed\n"));
         console.log(chalk.red.bold(result.length) + chalk.red(" error(s) found in the API definition\n"));
-        result.forEach(r => table.push([r.path, r.message]));
+        result.forEach(r => table.push([r.code, r.path, r.message]));
         console.log(table.toString());
     } else {
         console.log(chalk.green.bold("\nValidation Passed\n"));
