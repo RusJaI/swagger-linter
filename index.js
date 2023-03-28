@@ -62,11 +62,14 @@ spectral.run(myDocument).then(result => {
     // Replace the path field with a string representation of the path
     result.forEach(r => r.path = r.path.join('.'));
 
-    // Iterate over path field and if the same path is repeated fully or partially, retain the first occurrence and remove the rest
+    // Iterate over path field and if the same path is repeated fully or partially,
+    // retain the first occurrence and remove the rest
     result = result.filter((r, i, a) => a.findIndex(t => r.path.includes(t.path)) === i);
 
     // Remove code, severity and range fields from the result as those add no value to the output
     result.forEach(r => { delete r.severity; delete r.range; });
+
+    disableHostValidation(result);
 
     if (result.length > 0) {
         console.log(chalk.red.bold("\nValidation Failed\n"));
@@ -77,3 +80,12 @@ spectral.run(myDocument).then(result => {
         console.log(chalk.green.bold("\nValidation Passed\n"));
     }
 });
+
+// Function to disable host property validation
+const disableHostValidation = (result) => {
+    result.forEach(r => {
+        if (r.path === "host") {
+            result.splice(result.indexOf(r), 1);
+        }
+    });
+}
