@@ -84,7 +84,8 @@ spectral.run(myDocument).then(result => {
 // Function to disable host property validation
 const disableHostValidation = (result) => {
     result.forEach(r => {
-        if (r.path === "host") {
+        if (r.message === "\"host\" property must match pattern \"^[^{}/ :\\]+(?::\d+)?$\"." ||
+            r.message == "Property \"host\" is not expected to be here.") {  
             result.splice(result.indexOf(r), 1);
         }
     });
