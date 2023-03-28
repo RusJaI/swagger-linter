@@ -18,11 +18,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Collect provided args
 const program = new Command();
 program
-  .option("-f, --swaggerFile [value]", "path to Swagger or OpenAPI definition that needs to be validated")
+  .option(
+    "-f, --swaggerFile [value]",
+    "Path to Swagger or OpenAPI definition that needs to be validated"
+  )
+  .option(
+    "-d, --swaggerDirectory [value]",
+    "Path to the directory that contains the Swagger or OpenAPI definitions that need to be validated"
+  )
+  .option(
+    "-l, --validationLevel [value]",
+    "Validation level: 0, 1 or 2 (default is 2)\n\t\t\t\t \
+    0 - validation disabled; only specifies whether the API definition is returned by the validator\n\t\t\t\t \
+    1 - validate as in WSO2 API Manager 4.0.0\n\t\t\t\t \
+    2 - validation enabled"
+  )
   .parse(process.argv);
 
 const {
-    swaggerFile
+    swaggerFile = "",
+    swaggerDirectory = "",
+    validationLevel = 2
 } = program.opts();
 
 // Load API specification file that was provided as a command line argument
