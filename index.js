@@ -32,11 +32,18 @@ const {
     validationLevel = 2
 } = program.opts();
 
+// Check if the validation level is valid
+const level = parseInt(validationLevel);
+if (level !== 0 && level !== 1 && level !== 2) {
+    console.error(chalk.red.bold("Error: ") + "Invalid validation level detected. Provided validation level: " + level + " (Should be either 0, 1 or 2)");
+    process.exit(1);
+}
+
 if (swaggerFile !== "" && swaggerDirectory === "") {
     // Load API specification file that was provided as a command line argument
     try {
         let apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
-        validateDefinition(apiDefinition, swaggerFile);
+        validateDefinition(apiDefinition, swaggerFile, level);
     } catch (err) {
         if (err.code === "ENOENT") {
             console.error(chalk.red.bold("Error: ") + "File not found: " + swaggerFile);
@@ -64,7 +71,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
                             console.error(chalk.red.bold("Error: ") + "Unable to read file: " + file);
                             process.exit(1);
                         }
-                        validateDefinition(data, file);
+                        validateDefinition(data, file, level);
                     });
                 }
             });

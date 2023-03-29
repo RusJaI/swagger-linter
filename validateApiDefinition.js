@@ -10,13 +10,27 @@ import * as path from "node:path";
 import Table from "cli-table";
 import chalk from "chalk";
 
-export const validateDefinition = async (apiDefinition, fileName) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+let rulesetFilepath = "";
 
+// Populate the ruleset file path depending on the validation level
+async function populateRulesetFilepath(validationLevel) {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  if (validationLevel == 1) {
+    rulesetFilepath = path.join(__dirname, "/Rulesets/level1.spectral.yaml");
+  } else if (validationLevel == 2) {
+    rulesetFilepath = path.join(__dirname, "/Rulesets/level2.spectral.yaml");
+  } else {
+    // TODO: validation level 0 is not supported yet
+  }
+}
+
+export const validateDefinition = async (apiDefinition, fileName, validationLevel) => {
   const myDocument = new Document(apiDefinition, Parsers.Yaml);
 
+  // Load ruleset file depending on the validation level
+  await populateRulesetFilepath(validationLevel);
+
   const spectral = new Spectral();
-  const rulesetFilepath = path.join(__dirname, ".spectral.yaml"); // load ruleset file from root directory
   spectral.setRuleset(
     await bundleAndLoadRuleset(rulesetFilepath, { fs, fetch })
   );
