@@ -19,8 +19,6 @@ async function populateRulesetFilepath(validationLevel) {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level1.spectral.yaml");
   } else if (validationLevel == 2) {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level2.spectral.yaml");
-  } else {
-    // TODO: validation level 0 is not supported yet
   }
 }
 

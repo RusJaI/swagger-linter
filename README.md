@@ -2,16 +2,31 @@
 
 - npm package to validate Swagger definitions or OpenAPI definitions
 
+You can validate API definition(s) using either validation level 1 or 2;
+- **Validation level 1**: validate API definition(s) as in WSO2 API Manager 4.0.0
+- **Validation level 2**: Fully validate API definition(s)
+
 ## Usage
 
-`npm i swagger-linter`
-
-`swagger-linter -f [path to API definition JSON or YAML]`
-
-Optionally, clone this repo and run the following commnds
+Clone this repo and run the following commnds
 
 `npm i`
 
 `npm link`
 
-`swagger-linter -f [path to API definition JSON or YAML]`
+Validate provided Swagger or OpenAPI definition
+
+`swagger-linter -f [path to API definition JSON or YAML] -l [validation level 1 or 2]`
+
+or
+
+Validate a directory of Swagger definitions and/or OpenAPI definitions
+
+`swagger-linter -d [path to directory with API definitions] -l [validation level 1 or 2]`
+
+#### Ignored validation rules for level 1
+
+- host (oas2-schema): "host" property must match pattern "^[^{}/ :\\]+(?::\d+)?$".
+- host (oas3-schema): Property "host" is not expected to be here
+- oas2-discriminator: The discriminator property must be in the required property list. 
+- operation-operationId-unique: Every operation must have unique "operationId".

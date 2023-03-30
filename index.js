@@ -19,8 +19,7 @@ program
   )
   .option(
     "-l, --validationLevel [value]",
-    "Validation level: 0, 1 or 2 (default is 2)\n\t\t\t\t \
-    0 - validation disabled; only specifies whether the API definition is returned by the validator\n\t\t\t\t \
+    "Validation level: 1 or 2 (default is 2)\n\t\t\t\t \
     1 - validate as in WSO2 API Manager 4.0.0\n\t\t\t\t \
     2 - validation enabled"
   )
@@ -34,8 +33,8 @@ const {
 
 // Check if the validation level is valid
 const level = parseInt(validationLevel);
-if (level !== 0 && level !== 1 && level !== 2) {
-    console.error(chalk.red.bold("Error: ") + "Invalid validation level detected. Provided validation level: " + level + " (Should be either 0, 1 or 2)");
+if (level !== 1 && level !== 2) {
+    console.error(chalk.red.bold("Error: ") + "Invalid validation level detected. Provided validation level: " + level + " (Should be either 1 or 2)");
     process.exit(1);
 }
 
