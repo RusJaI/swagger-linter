@@ -2,11 +2,14 @@ extends:
   - spectral:oas
 rules:
   no-$ref-siblings: warn # error is the default value
-  host-validation:
-    given: $.host
-    message: "{{property}} {{error}}"
-    severity: error
-    then:
-      function: pattern
-      functionOptions:
-        match: "^[a-zA-Z:\\/\\.]*$"
+  # host-validation:
+  #   given: $.host
+  #   message: "{{property}} {{error}}"
+  #   severity: error
+  #   then:
+  #     function: pattern
+  #     functionOptions:
+  #       match: "^[a-zA-Z:\\/\\.]*$" # regex for host validation
+  oas2-discriminator: warn
+  operation-operationId-unique: warn
+  oas2-valid-schema-example: warn

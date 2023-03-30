@@ -55,6 +55,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     // If validation level is 1, only return linter errors that need to be fixed in order for the API definition to be accepted by APIM 4.0.0
     if (validationLevel === 1) {
       disableHostValidation(result); // Supress host validation errors
+      disableBasePathValidation(result); // Supress basePath validation errors
     }
 
     console.log("\n\u25A1 Validating " + fileName);
@@ -94,3 +95,16 @@ const disableHostValidation = (result) => {
     }
   });
 };
+
+// Function to disable basePath property validation
+const disableBasePathValidation = (result) => {
+  result.forEach((r) => {
+    if (
+      r.message ===
+        '"basePath" property must match pattern "^/".' ||
+      r.message == 'Property "basePath" is not expected to be here.'
+    ) {
+      result.splice(result.indexOf(r), 1);
+    }
+  });
+}
