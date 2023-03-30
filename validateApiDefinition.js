@@ -54,7 +54,10 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       delete r.range;
     });
 
-    disableHostValidation(result);
+    // If validation level is 1, only return linter errors that need to be fixed in order for the API definition to be accepted by APIM 4.0.0
+    if (validationLevel === 1) {
+      disableHostValidation(result); // Supress host validation errors
+    }
 
     console.log("\n\u25A1 Validating " + fileName);
     if (result.length > 0) {
@@ -86,7 +89,7 @@ const disableHostValidation = (result) => {
   result.forEach((r) => {
     if (
       r.message ===
-        '"host" property must match pattern "^[^{}/ :\\]+(?::d+)?$".' ||
+        '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".' ||
       r.message == 'Property "host" is not expected to be here.'
     ) {
       result.splice(result.indexOf(r), 1);

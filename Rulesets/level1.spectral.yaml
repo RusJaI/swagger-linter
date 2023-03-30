@@ -9,4 +9,4 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "^[a-zA-Z:\/]*$"
+        match: "^[a-zA-Z:\\/\\.]*$"
