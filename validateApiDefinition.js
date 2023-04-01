@@ -54,8 +54,9 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
     // If validation level is 1, only return linter errors that need to be fixed in order for the API definition to be accepted by APIM 4.0.0
     if (validationLevel === 1) {
-      disableHostValidation(result); // Supress host validation errors
-      disableBasePathValidation(result); // Supress basePath validation errors
+      result = disableHostValidation(result); // Supress host validation errors
+      result = disableBasePathValidation(result); // Supress basePath validation errors
+      result = disableRequiredSchemaPropertyMissingValidation(result); // Supress required schema property missing validation errors
     }
 
     console.log("\n\u25A1 Validating " + fileName);
@@ -85,26 +86,27 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
 // Function to disable host property validation
 const disableHostValidation = (result) => {
-  result.forEach((r) => {
-    if (
-      r.message ===
-        '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".' ||
+  return result.filter((r) => {
+    return !(r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".' ||
       r.message == 'Property "host" is not expected to be here.'
-    ) {
-      result.splice(result.indexOf(r), 1);
-    }
+    );
   });
 };
 
 // Function to disable basePath property validation
 const disableBasePathValidation = (result) => {
-  result.forEach((r) => {
-    if (
+  return result.filter((r) => {
+    return !(
       r.message ===
         '"basePath" property must match pattern "^/".' ||
       r.message == 'Property "basePath" is not expected to be here.'
-    ) {
-      result.splice(result.indexOf(r), 1);
-    }
+    );
+  });
+}
+
+// Function to disable required schema property missing validation
+const disableRequiredSchemaPropertyMissingValidation = (result) => {
+  return result.filter((element) => {
+    return !(element.message.endsWith('" property must have required property "schema".'));
   });
 }

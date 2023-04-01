@@ -33,4 +33,5 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 - oas2-discriminator: The discriminator property must be in the required property list. 
 - operation-operationId-unique: Every operation must have unique "operationId".
 - oas2-valid-schema-example: "example" property type must be object
+- oas2-schema: "x" property must have required property "schema".
 <!-- - path-params: Path parameter "id" must not be defined multiple times.  -->
