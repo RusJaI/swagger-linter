@@ -34,4 +34,7 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 - operation-operationId-unique: Every operation must have unique "operationId".
 - oas2-valid-schema-example: "example" property type must be object
 - oas2-schema: "x" property must have required property "schema".
+- oas2-schema: "x" property must have required property "name".
+- oas2-schema: "email" property must match format "email".
+- oas2-schema: "Property "data" is not expected to be here."
 <!-- - path-params: Path parameter "id" must not be defined multiple times.  -->

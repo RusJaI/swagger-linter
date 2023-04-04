@@ -56,10 +56,29 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     if (validationLevel === 1) {
       result = disableHostValidation(result); // Supress host validation errors
       result = disableBasePathValidation(result); // Supress basePath validation errors
-      result = disableRequiredSchemaPropertyMissingValidation(result); // Supress required schema property missing validation errors
+      
+      // Supress required schema property missing validation errors
+      result = disableErrorsThatEndsWithProvidedMessage(
+        result,
+        '" property must have required property "schema".'
+      );
+
+      // Supress required name property missing validation errors
+      result = disableErrorsThatEndsWithProvidedMessage(
+        result,
+        '" property must have required property "name".'
+      );
+      
+      // Supress data property validation errors
+      result = disableErrorsThatMatchProvidedMessage(
+        result,
+        'Property "data" is not expected to be here.'
+      );
+
+      result = disableEmailValidation(result); // Supress email validation errors
     }
 
-    console.log("\n\u25A1 Validating " + fileName);
+    console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");
     if (result.length > 0) {
       console.log(chalk.red.bold("\nValidation Failed\n"));
       console.log(
@@ -104,9 +123,23 @@ const disableBasePathValidation = (result) => {
   });
 }
 
-// Function to disable required schema property missing validation
-const disableRequiredSchemaPropertyMissingValidation = (result) => {
-  return result.filter((element) => {
-    return !(element.message.endsWith('" property must have required property "schema".'));
+// Function to disable email property validation
+const disableEmailValidation = (result) => {
+  return result.filter((r) => {
+    return !(r.path === "info.contact.email");
+  });
+}
+
+// Function to disable validation errors that end with the provided error message
+const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.endsWith(errorMessage));
+  });
+}
+
+// Function to disable validation errors with the provided error message
+const disableErrorsThatMatchProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message === errorMessage);
   });
 }
