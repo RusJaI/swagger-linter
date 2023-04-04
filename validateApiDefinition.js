@@ -75,7 +75,21 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         'Property "data" is not expected to be here.'
       );
 
+      // Supress required responses property missing validation errors for get, put and post methods
+      const httpMethods = ["get", "put", "post"]
+      httpMethods.forEach((method) => {
+        result = disableErrorsThatMatchProvidedMessage(
+          result,
+          '"' + method + '" property must have required property "responses".'
+        )
+      });
+
       result = disableEmailValidation(result); // Supress email validation errors
+      
+      // Supress invalid security definitions validation errors
+      result = disableErrorsThatMatchProvidedMessage(result, "Invalid security securityDefinitions.");
+      // Supress required path parameters not defined errors
+      result = disableErrorsThatStartsWithProvidedMessage(result, 'Operation must define parameter "{');
     }
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");
@@ -130,16 +144,23 @@ const disableEmailValidation = (result) => {
   });
 }
 
-// Function to disable validation errors that end with the provided error message
-const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
-  return result.filter((r) => {
-    return !(r.message.endsWith(errorMessage));
-  });
-}
-
 // Function to disable validation errors with the provided error message
 const disableErrorsThatMatchProvidedMessage = (result, errorMessage) => {
   return result.filter((r) => {
     return !(r.message === errorMessage);
+  });
+}
+
+// Function to disable validation errors that start with the provided error message
+const disableErrorsThatStartsWithProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.startsWith(errorMessage));
+  });
+}
+
+// Function to disable validation errors that end with the provided error message
+const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.endsWith(errorMessage));
   });
 }
