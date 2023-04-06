@@ -90,7 +90,15 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       // Supress invalid security definitions validation errors
       result = disableErrorsThatMatchProvidedMessage(result, "Invalid security securityDefinitions.");
       // Supress required description property missing validation errors
-      result = disableErrorsThatMatchProvidedMessage(result, '"200" property must have required property "description".');
+      result = disableErrorsThatEndsWithProvidedMessage(result, '" property must have required property "description".');
+      // Supress duplicate items related validation errors
+      result = disableErrorsThatContainsProvidedMessage(
+        result,
+        '" property must not have duplicate items (items ##'
+      );
+
+      // Supress responses property related validation errors
+      result = disableErrorsThatContainsProvidedMessage(result, '"responses" property must not be valid.');
     }
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");
@@ -170,5 +178,12 @@ const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
 const disableErrorsThatStartAndEndWithProvidedMessage = (result, startMessage, endMessage) => {
   return result.filter((r) => {
     return !(r.message.startsWith(startMessage) && r.message.endsWith(endMessage));
+  });
+}
+
+// Function to disable validation errors that has the provided substring in the error message
+const disableErrorsThatContainsProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.includes(errorMessage));
   });
 }

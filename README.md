@@ -41,4 +41,6 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 - oas2-schema: "post" property must have required property "responses".
 - oas2-schema: "put" property must have required property "responses".
 - oas2-schema: Invalid security securityDefinitions.
-- oas2-schema: "200" property must have required property "description".
+- oas2-schema: "x" property must have required property "description".
+- oas2-schema: "x" property must not have duplicate items (items ## y and z are identical).
+- oas2-schema: "responses" property must not be valid.
