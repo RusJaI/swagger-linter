@@ -36,10 +36,9 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 - oas2-schema: "x" property must have required property "schema".
 - oas2-schema: "x" property must have required property "name".
 - oas2-schema: "email" property must match format "email".
-- oas2-schema: "Property "data" is not expected to be here."
+- oas2-schema: "Property "x" is not expected to be here."
 - oas2-schema: "get" property must have required property "responses".
 - oas2-schema: "post" property must have required property "responses".
 - oas2-schema: "put" property must have required property "responses".
 - oas2-schema: Invalid security securityDefinitions.
-- path-params: Operation must define parameter "{bar}" as expected by path "/foo/{bar}".
-<!-- - path-params: Path parameter "id" must not be defined multiple times.  -->
+- oas2-schema: "200" property must have required property "description".

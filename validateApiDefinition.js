@@ -69,10 +69,11 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         '" property must have required property "name".'
       );
       
-      // Supress data property validation errors
-      result = disableErrorsThatMatchProvidedMessage(
+      // Supress property not expected to be present errors
+      result = disableErrorsThatStartAndEndWithProvidedMessage(
         result,
-        'Property "data" is not expected to be here.'
+        'Property "',
+        '" is not expected to be here.'
       );
 
       // Supress required responses property missing validation errors for get, put and post methods
@@ -88,8 +89,8 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       
       // Supress invalid security definitions validation errors
       result = disableErrorsThatMatchProvidedMessage(result, "Invalid security securityDefinitions.");
-      // Supress required path parameters not defined errors
-      result = disableErrorsThatStartsWithProvidedMessage(result, 'Operation must define parameter "{');
+      // Supress required description property missing validation errors
+      result = disableErrorsThatMatchProvidedMessage(result, '"200" property must have required property "description".');
     }
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");
@@ -162,5 +163,12 @@ const disableErrorsThatStartsWithProvidedMessage = (result, errorMessage) => {
 const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
   return result.filter((r) => {
     return !(r.message.endsWith(errorMessage));
+  });
+}
+
+// Function to disable validation errors that start and end with the provided error messages
+const disableErrorsThatStartAndEndWithProvidedMessage = (result, startMessage, endMessage) => {
+  return result.filter((r) => {
+    return !(r.message.startsWith(startMessage) && r.message.endsWith(endMessage));
   });
 }
