@@ -52,30 +52,55 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
         process.exit(1);
     }
 } else if (swaggerDirectory !== "" && swaggerFile === "") {
-    // Load API specification files that are present in the directory that was provided as a command line argument
-    fs.readdir(swaggerDirectory, (err, files) => {
-        if (err) {
-            if (err.code === "ENOENT") {
-                console.error(chalk.red.bold("Error: ") + "Directory not found: " + swaggerDirectory);
-            } else {
-                console.error(chalk.red.bold("Error: ") + "Unable to read directory: " + swaggerDirectory);
-            }
-            process.exit(1);
-        } else {
-            files.forEach((file) => {
-                if (file.endsWith(".yaml") || file.endsWith(".yml") || file.endsWith(".json")) {
-                    // Read the contents of the file
-                    fs.readFile(swaggerDirectory + '/' + file, 'utf8', (err, data) => {
-                        if (err) {
-                            console.error(chalk.red.bold("Error: ") + "Unable to read file: " + file);
-                            process.exit(1);
-                        }
-                        validateDefinition(data, file, level);
-                    });
+    let validFileCount = 0;
+    let invalidFileCount = 0;
+
+    const dirReads = [];
+    const dirReadPromise = new Promise((resolve, reject) => {
+        // Load API specification files that are present in the directory that was provided as a command line argument
+        fs.readdir(swaggerDirectory, async (err, files) => {
+            if (err) {
+                if (err.code === "ENOENT") {
+                    console.error(chalk.red.bold("Error: ") + "Directory not found: " + swaggerDirectory);
+                } else {
+                    console.error(chalk.red.bold("Error: ") + "Unable to read directory: " + swaggerDirectory);
                 }
-            });
-        }
+                reject(err);
+            }
+            const fileReads = [];
+            for (const file of files) {
+                if (file.endsWith(".yaml") || file.endsWith(".yml") || file.endsWith(".json")) {
+                    const fileReadPromise = new Promise((resolve, reject) => {
+                        fs.readFile(swaggerDirectory + '/' + file, 'utf8', async (err, data) => {
+                            if (err) {
+                                console.error(chalk.red.bold("Error: ") + "Unable to read file: " + file);
+                                reject(err);
+                            }
+                            const isDefinitionValid = await validateDefinition(data, file, level);
+                            if (isDefinitionValid) {
+                                validFileCount++;
+                            } else {
+                                invalidFileCount++;
+                            }
+                            resolve();
+                        });
+                    });
+                    fileReads.push(fileReadPromise);
+                }
+            }
+            await Promise.all(fileReads);
+            resolve();
+        });
     });
+    dirReads.push(dirReadPromise);
+    await Promise.all(dirReads);
+
+    console.log(chalk.green.bold("\nValidation Completed \u{1F680}\n"));
+    console.log(chalk.bgCyan.bold("~ SUMMARY ~\n"));
+    console.log(chalk.cyan.bold("Total File Count: ") + (validFileCount + invalidFileCount));
+    console.log(chalk.cyan.bold("Valid API Definitions: ") + validFileCount);
+    console.log(chalk.cyan.bold("Invalid API Definitions: ") + invalidFileCount + "\n");
+
 } else if (swaggerDirectory !== "" && swaggerFile !== "") {
     console.error(chalk.yellow("Warn: ") + "Please provide either a swagger file (-f) or a directory (-d)");
     process.exit(1);
