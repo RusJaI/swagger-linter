@@ -10,9 +10,9 @@ rules:
   #     function: pattern
   #     functionOptions:
   #       match: "^[a-zA-Z:\\/\\.]*$" # regex for host validation
-  oas2-discriminator: warn
-  operation-operationId-unique: warn
-  oas2-valid-schema-example: warn
-  oas3-valid-schema-example: warn
-  path-params: warn
-  openapi-tags-uniqueness: warn
+  # oas2-discriminator: warn
+  # operation-operationId-unique: warn
+  # oas2-valid-schema-example: warn
+  # oas3-valid-schema-example: warn
+  # path-params: warn
+  # openapi-tags-uniqueness: warn
