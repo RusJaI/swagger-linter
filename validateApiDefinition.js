@@ -69,13 +69,40 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         '" property must have required property "name".'
       );
       
-      // Supress data property validation errors
-      result = disableErrorsThatMatchProvidedMessage(
+      // Supress property not expected to be present errors
+      result = disableErrorsThatStartAndEndWithProvidedMessage(
         result,
-        'Property "data" is not expected to be here.'
+        'Property "',
+        '" is not expected to be here.'
       );
 
+      // Supress required responses property missing validation errors for get, put and post methods
+      const httpMethods = ["get", "put", "post"]
+      httpMethods.forEach((method) => {
+        result = disableErrorsThatMatchProvidedMessage(
+          result,
+          '"' + method + '" property must have required property "responses".'
+        )
+      });
+
       result = disableEmailValidation(result); // Supress email validation errors
+      
+      // Supress invalid security definitions validation errors
+      result = disableErrorsThatMatchProvidedMessage(result, "Invalid security securityDefinitions.");
+      // Supress required description property missing validation errors
+      result = disableErrorsThatEndsWithProvidedMessage(result, '" property must have required property "description".');
+      // Supress duplicate items related validation errors
+      result = disableErrorsThatContainsProvidedMessage(
+        result,
+        '" property must not have duplicate items (items ##'
+      );
+
+      // Supress responses property related validation errors
+      result = disableErrorsThatContainsProvidedMessage(result, '"responses" property must not be valid.');
+      // Supress propterty value not equal to allowed values validation errors
+      result = disableErrorsThatContainsProvidedMessage(result, '" property must be equal to one of the allowed values');
+      // Supress schema property related errors
+      result = disableErrorsThatMatchProvidedMessage(result, '"schema" property must have required property "type".');
     }
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");
@@ -130,6 +157,20 @@ const disableEmailValidation = (result) => {
   });
 }
 
+// Function to disable validation errors with the provided error message
+const disableErrorsThatMatchProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message === errorMessage);
+  });
+}
+
+// Function to disable validation errors that start with the provided error message
+const disableErrorsThatStartsWithProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.startsWith(errorMessage));
+  });
+}
+
 // Function to disable validation errors that end with the provided error message
 const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
   return result.filter((r) => {
@@ -137,9 +178,16 @@ const disableErrorsThatEndsWithProvidedMessage = (result, errorMessage) => {
   });
 }
 
-// Function to disable validation errors with the provided error message
-const disableErrorsThatMatchProvidedMessage = (result, errorMessage) => {
+// Function to disable validation errors that start and end with the provided error messages
+const disableErrorsThatStartAndEndWithProvidedMessage = (result, startMessage, endMessage) => {
   return result.filter((r) => {
-    return !(r.message === errorMessage);
+    return !(r.message.startsWith(startMessage) && r.message.endsWith(endMessage));
+  });
+}
+
+// Function to disable validation errors that has the provided substring in the error message
+const disableErrorsThatContainsProvidedMessage = (result, errorMessage) => {
+  return result.filter((r) => {
+    return !(r.message.includes(errorMessage));
   });
 }

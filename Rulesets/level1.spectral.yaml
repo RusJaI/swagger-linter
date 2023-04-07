@@ -13,3 +13,6 @@ rules:
   oas2-discriminator: warn
   operation-operationId-unique: warn
   oas2-valid-schema-example: warn
+  oas3-valid-schema-example: warn
+  path-params: warn
+  openapi-tags-uniqueness: warn
