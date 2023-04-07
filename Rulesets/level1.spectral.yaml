@@ -15,3 +15,4 @@ rules:
   oas2-valid-schema-example: warn
   oas3-valid-schema-example: warn
   path-params: warn
+  openapi-tags-uniqueness: warn

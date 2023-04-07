@@ -99,6 +99,10 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
       // Supress responses property related validation errors
       result = disableErrorsThatContainsProvidedMessage(result, '"responses" property must not be valid.');
+      // Supress propterty value not equal to allowed values validation errors
+      result = disableErrorsThatContainsProvidedMessage(result, '" property must be equal to one of the allowed values');
+      // Supress schema property related errors
+      result = disableErrorsThatMatchProvidedMessage(result, '"schema" property must have required property "type".');
     }
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...");

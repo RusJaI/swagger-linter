@@ -44,3 +44,6 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 - oas2-schema: "x" property must have required property "description".
 - oas2-schema: "x" property must not have duplicate items (items ## y and z are identical).
 - oas2-schema: "responses" property must not be valid.
+- oas2-schema: "x" property must be equal to one of the allowed values.
+- oas2-schema: "type" property must be equal to one of the allowed values: "array", "boolean", "integer", "null", "number", "object", "string". Did you mean "array"?.
+- oas2-schema: "schema" property must have required property "type".
