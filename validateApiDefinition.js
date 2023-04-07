@@ -33,7 +33,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     await bundleAndLoadRuleset(rulesetFilepath, { fs, fetch })
   );
 
-  spectral.run(myDocument).then((result) => {
+  return spectral.run(myDocument).then(async (result) => {
     // Iterate the results and select only those with severity of 0 (i.e. errors)
     result = result.filter((r) => r.severity === 0);
 
@@ -123,9 +123,15 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       });
 
       result.forEach((r) => table.push([r.code, r.path, r.message]));
-      console.log(table.toString());
+      
+      await new Promise(resolve => {
+        console.log(table.toString());
+        resolve();
+      });
+      return false;
     } else {
       console.log(chalk.green.bold("\nValidation Passed\n"));
+      return true;
     }
   });
 };
