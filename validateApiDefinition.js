@@ -156,20 +156,14 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 // Function to disable host property validation
 const disableHostValidation = (result) => {
   return result.filter((r) => {
-    return !(r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".' ||
-      r.message == 'Property "host" is not expected to be here.'
-    );
+    return !(r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".');
   });
 };
 
 // Function to disable basePath property validation
 const disableBasePathValidation = (result) => {
   return result.filter((r) => {
-    return !(
-      r.message ===
-        '"basePath" property must match pattern "^/".' ||
-      r.message == 'Property "basePath" is not expected to be here.'
-    );
+    return !(r.message === '"basePath" property must match pattern "^/".');
   });
 }
 
@@ -178,7 +172,7 @@ const disableErrorsBasedOnPath = (result, pathsToIgnore) => {
   const warnList = [];
   const resultList = result.filter((r) => {
     const shouldIgnore = pathsToIgnore.some((path) => {
-      return r.path === path;
+      return r.path === path && r.code !== 'oas3-schema';
     });
     return !(shouldIgnore);
   });
@@ -190,7 +184,7 @@ const disableErrorsThatMatchProvidedMessage = (result, errorsToDisable) => {
   const warnList = [];
   const resultList = result.filter((r) => {
     const shouldIgnore = errorsToDisable.some((errorMessage) => {
-      return r.message === errorMessage;
+      return r.message === errorMessage && r.code !== 'oas3-schema';
     });
     shouldIgnore ? warnList.push(r) : null;
     return !(shouldIgnore);
@@ -215,7 +209,7 @@ const disableErrorsThatEndsWithProvidedMessage = (result, errorsToDisable) => {
   const warnList = [];
   const resultList = result.filter((r) => {
     const shouldIgnore = errorsToDisable.some((errorMessage) => {
-      return r.message.endsWith(errorMessage);
+      return r.message.endsWith(errorMessage) && r.code !== 'oas3-schema';
     });
     shouldIgnore ? warnList.push(r) : null;
     return !(shouldIgnore);
@@ -228,7 +222,7 @@ const disableErrorsThatStartAndEndWithProvidedMessage = (result, errorsToDisable
   const warnList = [];
   const resultList = result.filter((r) => {
     const shouldIgnore = errorsToDisable.some(([startMessage, endMessage]) => {
-      return r.message.startsWith(startMessage) && r.message.endsWith(endMessage);
+      return r.message.startsWith(startMessage) && r.message.endsWith(endMessage) && r.code !== 'oas3-schema';
     });
     shouldIgnore ? warnList.push(r) : null;
     return !(shouldIgnore);
@@ -241,7 +235,7 @@ const disableErrorsWithPartialErrorMessageMatch = (result, errorMessagesToDisabl
   const warnList = [];
   const resultList = result.filter((r) => {
     const isErrorInErrorMessageToDisable = errorMessagesToDisable.some((errorMessage) => {
-      return r.message.includes(errorMessage);
+      return r.message.includes(errorMessage) && r.code !== 'oas3-schema';
     });
     isErrorInErrorMessageToDisable ? warnList.push(r) : null;
     return !(isErrorInErrorMessageToDisable);
@@ -254,7 +248,7 @@ const disableErrorsBasedOnRuleCode = (result, rulesToDisable) => {
   const warnList = [];
   const resultList = result.filter((r) => {
     const isRuleCodeInRulesToDisable = rulesToDisable.some((ruleCode) => {
-      return r.code === ruleCode;
+      return r.code === ruleCode && r.code !== 'oas3-schema';
     });
     isRuleCodeInRulesToDisable ? warnList.push(r) : null;
     return !isRuleCodeInRulesToDisable;
