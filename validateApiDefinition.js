@@ -1,9 +1,11 @@
 import * as fs from "node:fs";
+import os from 'os';
 import { bundleAndLoadRuleset } from "@stoplight/spectral-ruleset-bundler/with-loader";
 import Parsers from "@stoplight/spectral-parsers";
 const { Spectral, Document } = spectralCore;
 import spectralRuntime from "@stoplight/spectral-runtime";
 import spectralCore from "@stoplight/spectral-core";
+import { spawn } from "child_process";
 const { fetch } = spectralRuntime;
 import { fileURLToPath } from "node:url";
 import * as path from "node:path";
@@ -11,10 +13,11 @@ import Table from "cli-table";
 import chalk from "chalk";
 
 let rulesetFilepath = "";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const jarPath = path.join(__dirname, '/java-client/apim-swagger-validator-1.0.0.jar');
 
 // Populate the ruleset file path depending on the validation level
 async function populateRulesetFilepath(validationLevel) {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
   if (validationLevel == 1) {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level1.spectral.yaml");
   } else if (validationLevel == 2) {
@@ -22,7 +25,47 @@ async function populateRulesetFilepath(validationLevel) {
   }
 }
 
-export const validateDefinition = async (apiDefinition, fileName, validationLevel) => {
+export const validateDefinition = async (apiDefinition, fileName, validationLevel, pathToDefinitionForJavaClient = fileName) => {
+  // Run the Java client to validate the API definition
+  const pathToDef = 'location:' + pathToDefinitionForJavaClient;
+  const validationLevelForJavaClient = 1;
+  const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
+
+  const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
+  const tempFilePath = path.join(os.tmpdir(), tempFileName);
+  const writeStream = fs.createWriteStream(tempFilePath);
+
+  const jarProcess = spawn('java', javaArgs);
+  jarProcess.stdout.pipe(writeStream);
+  jarProcess.stderr.on('data', (data) => {
+    console.error(data.toString());
+  });
+
+  let isValid = false; // Java client validation result is stored in this variable
+
+  await new Promise((resolve, _) => {
+    jarProcess.on('close', () => {
+      const output = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
+
+      // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
+      const regex = /Total Successful Files Count (\d+)/;
+      const match = output.match(regex);
+      if (match) {
+        const successfulFileCount = parseInt(match[1], 10);
+        successfulFileCount === 1 ? (isValid = true) : (isValid = false);
+      } else {
+        console.log(`Failed to get the successful file count from the java client output`);
+      }
+      console.log(output);
+
+      // Delete the temporary file
+      fs.unlinkSync(tempFilePath);
+
+      resolve(); // Resolve the promise when the callback is complete
+    });
+  });
+
+  // Run the spectral linter validation
   const myDocument = new Document(apiDefinition, Parsers.Yaml);
 
   // Load ruleset file depending on the validation level
@@ -35,18 +78,13 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
   return spectral.run(myDocument).then(async (result) => {
     let level1WarnList = [];
+    console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
 
     // Iterate the results and select only those with severity of 0 (i.e. errors)
     result = result.filter((r) => r.severity === 0);
 
     // Replace the path field with a string representation of the path
     result.forEach((r) => (r.path = r.path.join(".")));
-
-    // Iterate over path field and if the same path is repeated fully or partially,
-    // retain the first occurrence and remove the rest
-    result = result.filter(
-      (r, i, a) => a.findIndex((t) => r.path.includes(t.path)) === i
-    );
 
     // Remove code, severity and range fields from the result as those add no value to the output
     result.forEach((r) => {
@@ -63,7 +101,6 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         "oas2-discriminator",
         "operation-operationId-unique",
         "oas2-valid-schema-example",
-        "oas3-valid-schema-example",
         "path-params",
         "openapi-tags-uniqueness",
       ];
@@ -117,7 +154,6 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       result = disableBasePathValidation(result); // Supress basePath validation errors
     }
 
-    console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
     if (result.length > 0) {
       // Output table format for Errors
       const table = new Table({
@@ -142,13 +178,21 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       
       await logL1Warnings(validationLevel, level1WarnList);
 
-      console.log(chalk.red.bold("\nValidation Failed\n"));
+      // console.log(chalk.red.bold("\nValidation Failed\n"));
 
-      return false;
+      // return false;
     } else {
       await logL1Warnings(validationLevel, level1WarnList);
+      // console.log(chalk.green.bold("\nValidation Passed\n"));
+      // return true;
+    }
+
+    if (isValid) {
       console.log(chalk.green.bold("\nValidation Passed\n"));
       return true;
+    } else {
+      console.log(chalk.red.bold("\nValidation Failed\n"));
+      return false;
     }
   });
 };
@@ -191,18 +235,6 @@ const disableErrorsThatMatchProvidedMessage = (result, errorsToDisable) => {
   });
   return [resultList, warnList];
 }
-
-// // Function to disable validation errors that start with any of the provided error messages
-// const disableErrorsThatStartsWithProvidedMessage = (result, errorsToDisable) => {
-//   const warnList = [];
-//   const resultList = result.filter((r) => {
-//     const shouldIgnore = errorsToDisable.some((errorMessage) => {
-//       return r.message.startsWith(errorMessage);
-//     });
-//     shouldIgnore ? warnList.push(r) : null;
-//     return !(shouldIgnore);
-//   });
-// }
 
 // Function to disable validation errors that end with any of the provided error messages
 const disableErrorsThatEndsWithProvidedMessage = (result, errorsToDisable) => {
@@ -273,7 +305,7 @@ const logL1Warnings = async (validationLevel, level1WarnList) => {
     await new Promise(resolve => {
       console.log(chalk.yellowBright.bold("\n~ L1 Warnings ~"));
       console.log(chalk.yellowBright.bold(level1WarnList.length) + chalk.yellowBright(" warning(s) found in the API definition"));
-      console.log("\n\u2757 The following warnings are not errors but are recommended to be fixed for better API definition quality.\n");
+      console.log("\n\u2757 API definition validation passed with the below-listed errors, using may lead to functionality issues.\n");
       console.log(warnTable.toString());
       resolve();
     });
