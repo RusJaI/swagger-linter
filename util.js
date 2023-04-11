@@ -49,9 +49,11 @@ export const disableExtraInfoValidation = (result) => {
 // Function to improve error messages to reflect that "x-" prefix can be used to retain properties
 export const improveErrorMessages = (result) => {
     result.forEach((r) => {
-        if (r.message === 'Property "host" is not expected to be here.' ||
-        r.message === 'Property "basePath" is not expected to be here.' ||
-        r.message === 'Property "extraInfo" is not expected to be here.') {
+        if (
+            r.message === 'Property "host" is not expected to be here.' ||
+            r.message === 'Property "basePath" is not expected to be here.' ||
+            r.message === 'Property "extraInfo" is not expected to be here.'
+        ) {
             r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
         }
     });
