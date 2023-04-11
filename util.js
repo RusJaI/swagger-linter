@@ -3,114 +3,47 @@ import chalk from "chalk";
 
 // Function to disable host property validation
 export const disableHostValidation = (result) => {
-  return result.filter((r) => {
-    return !(
-      r.message ===
-      '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".'
-    );
-  });
+    const warnList = [];
+    const resultList = result.filter((r) => {
+        if (r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".') {
+            r.message + + ' You can retain this propery by using the "x-" prefix.';
+            warnList.push(r);
+            return false;
+        } else {
+            return true;
+        }
+    });
+    return [resultList, warnList];
 };
 
 // Function to disable basePath property validation
 export const disableBasePathValidation = (result) => {
-  return result.filter((r) => {
-    return !(r.message === '"basePath" property must match pattern "^/".');
-  });
-};
-
-// Function to disable validation errors based on path
-export const disableErrorsBasedOnPath = (result, pathsToIgnore) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const shouldIgnore = pathsToIgnore.some((path) => {
-      return r.path === path && r.code !== "oas3-schema";
+    const warnList = [];
+    const resultList = result.filter((r) => {
+        if (r.message === '"basePath" property must match pattern "^/".') {
+            r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
+            warnList.push(r);
+            return false;
+        } else {
+            return true;
+        }
     });
-    return !shouldIgnore;
-  });
-  return [resultList, warnList];
+    return [resultList, warnList];
 };
 
-// Function to disable validation errors with any of the provided error messages
-export const disableErrorsThatMatchProvidedMessage = (
-  result,
-  errorsToDisable
-) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const shouldIgnore = errorsToDisable.some((errorMessage) => {
-      return r.message === errorMessage && r.code !== "oas3-schema";
+// Function to disable extraInfo property validation
+export const disableExtraInfoValidation = (result) => {
+    const warnList = [];
+    const resultList = result.filter((r) => {
+        if (r.message === 'Property "extraInfo" is not expected to be here.' && r.code === 'oas2-schema') {
+            r.message + ' You can retain this propery by using the "x-" prefix.';
+            warnList.push(r);
+            return false;
+        } else {
+            return true;
+        }
     });
-    shouldIgnore ? warnList.push(r) : null;
-    return !shouldIgnore;
-  });
-  return [resultList, warnList];
-};
-
-// Function to disable validation errors that end with any of the provided error messages
-export const disableErrorsThatEndsWithProvidedMessage = (
-  result,
-  errorsToDisable
-) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const shouldIgnore = errorsToDisable.some((errorMessage) => {
-      return r.message.endsWith(errorMessage) && r.code !== "oas3-schema";
-    });
-    shouldIgnore ? warnList.push(r) : null;
-    return !shouldIgnore;
-  });
-  return [resultList, warnList];
-};
-
-// Function to disable validation errors that start and end with any of the provided error messages
-export const disableErrorsThatStartAndEndWithProvidedMessage = (
-  result,
-  errorsToDisable
-) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const shouldIgnore = errorsToDisable.some(([startMessage, endMessage]) => {
-      return (
-        r.message.startsWith(startMessage) &&
-        r.message.endsWith(endMessage) &&
-        r.code !== "oas3-schema"
-      );
-    });
-    shouldIgnore ? warnList.push(r) : null;
-    return !shouldIgnore;
-  });
-  return [resultList, warnList];
-};
-
-// Function to disable validation errors that has any of the provided substrings in the error message
-export const disableErrorsWithPartialErrorMessageMatch = (
-  result,
-  errorMessagesToDisable
-) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const isErrorInErrorMessageToDisable = errorMessagesToDisable.some(
-      (errorMessage) => {
-        return r.message.includes(errorMessage) && r.code !== "oas3-schema";
-      }
-    );
-    isErrorInErrorMessageToDisable ? warnList.push(r) : null;
-    return !isErrorInErrorMessageToDisable;
-  });
-  return [resultList, warnList];
-};
-
-// Function to disable validation errors with rule code that matches with any element within rulesToDisable
-export const disableErrorsBasedOnRuleCode = (result, rulesToDisable) => {
-  const warnList = [];
-  const resultList = result.filter((r) => {
-    const isRuleCodeInRulesToDisable = rulesToDisable.some((ruleCode) => {
-      return r.code === ruleCode && r.code !== "oas3-schema";
-    });
-    isRuleCodeInRulesToDisable ? warnList.push(r) : null;
-    return !isRuleCodeInRulesToDisable;
-  });
-  return [resultList, warnList];
+    return [resultList, warnList];
 };
 
 // Function to log output of L1 warnings

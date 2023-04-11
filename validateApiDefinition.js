@@ -13,12 +13,7 @@ import chalk from "chalk";
 import {
   disableHostValidation,
   disableBasePathValidation,
-  disableErrorsBasedOnPath,
-  disableErrorsThatMatchProvidedMessage,
-  disableErrorsThatEndsWithProvidedMessage,
-  disableErrorsThatStartAndEndWithProvidedMessage,
-  disableErrorsWithPartialErrorMessageMatch,
-  disableErrorsBasedOnRuleCode,
+  disableExtraInfoValidation,
   logL1Warnings,
   logErrorOutput,
   extractJavaClientOutput,
@@ -52,7 +47,6 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
   if (validationLevel === 1) {
     return spectral.run(myDocument).then(async (result) => {
-      // let isValid = false; // Java client validation result is stored in this variable
       let level1WarnList = [];
   
       // Run the Java client to validate the API definition
@@ -108,62 +102,17 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
   
       let warnList;
 
-      // Disable validation errors based on rule code
-      const rulesToDisable = [
-        "oas2-discriminator",
-        "operation-operationId-unique",
-        "oas2-valid-schema-example",
-        "path-params",
-        "openapi-tags-uniqueness",
-      ];
-      [result, warnList] = disableErrorsBasedOnRuleCode(result, rulesToDisable);
+      // Supress host validation errors
+      [result, warnList] = disableHostValidation(result);
       level1WarnList = [...level1WarnList, ...warnList];
 
-      // Disable validation errors based on start of error message
-      const errorsToDisableWithStartAndEndMatch = [
-        ['Property "', '" is not expected to be here.'], // Supress property not expected to be present errors
-      ];
-      [result, warnList] = disableErrorsThatStartAndEndWithProvidedMessage(result, errorsToDisableWithStartAndEndMatch);
+      // Supress basePath validation errors
+      [result, warnList] = disableBasePathValidation(result);
       level1WarnList = [...level1WarnList, ...warnList];
 
-      // Disable validation errors based on end of error message
-      const errorsToDisable = [
-        '" property must have required property "schema".', // Supress required schema property missing validation errors
-        '" property must have required property "name".', // Supress required name property missing validation errors
-        '" property must have required property "description".', // Supress required description property missing validation errors
-      ];
-      [result, warnList] = disableErrorsThatEndsWithProvidedMessage(result, errorsToDisable);
+      // Supress extra extraInfo errors
+      [result, warnList] = disableExtraInfoValidation(result);
       level1WarnList = [...level1WarnList, ...warnList];
-
-      // Disable validation errors based on full error message
-      const errorMessages = [
-        '"get" property must have required property "responses".', // Supress required responses property missing validation errors for get method
-        '"put" property must have required property "responses".', // Supress required responses property missing validation errors for put method
-        '"post" property must have required property "responses".', // Supress required responses property missing validation errors for post method
-      ];
-      [result, warnList] = disableErrorsThatMatchProvidedMessage(result, errorMessages);
-      level1WarnList = [...level1WarnList, ...warnList];
-
-      // Disbale validation errors that has partial match of the error message
-      const errorMessagesToDisable = [
-        '" property must not have duplicate items (items ##', // Supress duplicate items related validation errors
-        '"responses" property must not be valid.', // Supress responses property related validation errors
-        '" property must be equal to one of the allowed values', // Supress propterty value not equal to allowed values validation errors
-        "Invalid security securityDefinitions.", // Supress invalid security definitions validation errors
-        '"schema" property must have required property "type".', // Supress schema property related errors
-      ];
-      [result, warnList] = disableErrorsWithPartialErrorMessageMatch(result, errorMessagesToDisable);
-      level1WarnList = [...level1WarnList, ...warnList];
-
-      // Disable validation errors based on path
-      const pathsToIgnore = [
-        "info.contact.email", // Supress email validation errors
-      ];
-      [result, warnList] = disableErrorsBasedOnPath(result, pathsToIgnore);
-      level1WarnList = [...level1WarnList, ...warnList];
-
-      result = disableHostValidation(result); // Supress host validation errors
-      result = disableBasePathValidation(result); // Supress basePath validation errors
   
       if (isValid) {
         if (result.length > 0 || level1WarnList.length > 0) {
