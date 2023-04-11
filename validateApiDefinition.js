@@ -50,63 +50,62 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     await bundleAndLoadRuleset(rulesetFilepath, { fs, fetch })
   );
 
-  return spectral.run(myDocument).then(async (result) => {
-    // let isValid = false; // Java client validation result is stored in this variable
-    let level1WarnList = [];
-
-    // Run the Java client to validate the API definition
-    const pathToDef = 'location:' + pathToDefinitionForJavaClient;
-    const validationLevelForJavaClient = 1;
-    const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
-
-    const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
-    const tempFilePath = path.join(os.tmpdir(), tempFileName);
-    const writeStream = fs.createWriteStream(tempFilePath);
-
-    const jarProcess = spawn('java', javaArgs);
-    jarProcess.stdout.pipe(writeStream);
-    jarProcess.stderr.on('data', (data) => {
-      console.error(data.toString());
-    });
-
-    const javaClientOutput = await new Promise((resolve, reject) => {
-      jarProcess.on('close', () => {
-        const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
-
-        // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
-        let isValid;
-        const regex = /Total Successful Files Count (\d+)/;
-        const match = javaClientStdout.match(regex);
-        if (match) {
-          const successfulFileCount = parseInt(match[1], 10);
-          successfulFileCount === 1 ? (isValid = true) : (isValid = false);
-          fs.unlinkSync(tempFilePath); // Delete the temporary file
-          resolve([isValid, javaClientStdout]);
-        } else {
-          console.log(`Failed to get the successful file count from the java client output`);
-          reject(new Error('Invalid Java client output'));
-        }
+  if (validationLevel === 1) {
+    return spectral.run(myDocument).then(async (result) => {
+      // let isValid = false; // Java client validation result is stored in this variable
+      let level1WarnList = [];
+  
+      // Run the Java client to validate the API definition
+      const pathToDef = 'location:' + pathToDefinitionForJavaClient;
+      const validationLevelForJavaClient = 1;
+      const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
+  
+      const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
+      const tempFilePath = path.join(os.tmpdir(), tempFileName);
+      const writeStream = fs.createWriteStream(tempFilePath);
+  
+      const jarProcess = spawn('java', javaArgs);
+      jarProcess.stdout.pipe(writeStream);
+      jarProcess.stderr.on('data', (data) => {
+        console.error(data.toString());
       });
-    });
-
-    const [isValid, javaClientStdout] = await javaClientOutput;
-
-    console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
-
-    // Iterate the results and select only those with severity of 0 (i.e. errors)
-    result = result.filter((r) => r.severity === 0);
-
-    // Replace the path field with a string representation of the path
-    result.forEach((r) => (r.path = r.path.join(".")));
-
-    // Remove code, severity and range fields from the result as those add no value to the output
-    result.forEach((r) => {
-      delete r.severity;
-      delete r.range;
-    });
-
-    // If validation level is 1, only return linter errors that need to be fixed in order for the API definition to be accepted by APIM 4.0.0
-    if (validationLevel === 1) {
+  
+      const javaClientOutput = await new Promise((resolve, reject) => {
+        jarProcess.on('close', () => {
+          const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
+  
+          // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
+          let isValid;
+          const regex = /Total Successful Files Count (\d+)/;
+          const match = javaClientStdout.match(regex);
+          if (match) {
+            const successfulFileCount = parseInt(match[1], 10);
+            successfulFileCount === 1 ? (isValid = true) : (isValid = false);
+            fs.unlinkSync(tempFilePath); // Delete the temporary file
+            resolve([isValid, javaClientStdout]);
+          } else {
+            console.log(`Failed to get the successful file count from the java client output`);
+            reject(new Error('Invalid Java client output'));
+          }
+        });
+      });
+  
+      const [isValid, javaClientStdout] = await javaClientOutput;
+  
+      console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
+  
+      // Iterate the results and select only those with severity of 0 (i.e. errors)
+      result = result.filter((r) => r.severity === 0);
+  
+      // Replace the path field with a string representation of the path
+      result.forEach((r) => (r.path = r.path.join(".")));
+  
+      // Remove code, severity and range fields from the result as those add no value to the output
+      result.forEach((r) => {
+        delete r.severity;
+        delete r.range;
+      });
+  
       let warnList;
 
       // Disable validation errors based on rule code
@@ -165,33 +164,57 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
       result = disableHostValidation(result); // Supress host validation errors
       result = disableBasePathValidation(result); // Supress basePath validation errors
-    }
-
-    if (isValid) {
-      if (result.length > 0 || level1WarnList.length > 0) {
-        console.log(
-          "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.0.0 will " +
-          chalk.green("ACCEPT") + " this API definition.\n"
-        );
-      }
-
-      await logErrorOutput(result);
-      await logL1Warnings(validationLevel, level1WarnList);
-
-      console.log(chalk.green.bold("\nValidation Passed\n"));
-    } else {
-      console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.0.0 will " +
-      chalk.red("NOT ACCEPT") + " this API definition.\n");
-
-      if (result.length > 0 || level1WarnList.length > 0) {
+  
+      if (isValid) {
+        if (result.length > 0 || level1WarnList.length > 0) {
+          console.log(
+            "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.0.0 will " +
+            chalk.green("ACCEPT") + " this API definition.\n"
+          );
+        }
+  
         await logErrorOutput(result);
         await logL1Warnings(validationLevel, level1WarnList);
+  
+        console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
-        extractJavaClientOutput(javaClientStdout)
+        console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.0.0 will " +
+        chalk.red("NOT ACCEPT") + " this API definition.\n");
+  
+        if (result.length > 0 || level1WarnList.length > 0) {
+          await logErrorOutput(result);
+          await logL1Warnings(validationLevel, level1WarnList);
+        } else {
+          extractJavaClientOutput(javaClientStdout)
+        }
+  
+        console.log(chalk.red.bold("\nValidation Failed\n"));
       }
+      return isValid;
+    });
+  } else {
+    return spectral.run(myDocument).then(async (result) => {
+      console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
+      // Iterate the results and select only those with severity of 0 (i.e. errors)
+      result = result.filter((r) => r.severity === 0);
 
-      console.log(chalk.red.bold("\nValidation Failed\n"));
-    }
-    return isValid;
-  });
+      // Replace the path field with a string representation of the path
+      result.forEach((r) => (r.path = r.path.join(".")));
+  
+      // Remove code, severity and range fields from the result as those add no value to the output
+      result.forEach((r) => {
+        delete r.severity;
+        delete r.range;
+      });
+      
+      if (result.length > 0) {
+        await logErrorOutput(result);
+        console.log(chalk.red.bold("\nValidation Failed\n"));
+        return false;
+      } else {
+        console.log(chalk.green.bold("\nValidation Passed\n"));
+        return true;
+      }
+    });
+  }
 };
