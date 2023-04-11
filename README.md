@@ -28,20 +28,4 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 
 - host (oas2-schema): "host" property must match pattern "^[^{}/ :\\]+(?::\d+)?$".
 - basePath (oas2-schema): "basePath" property must match pattern "^/".
-- oas2-discriminator: The discriminator property must be in the required property list. 
-- operation-operationId-unique: Every operation must have unique "operationId".
-- oas2-valid-schema-example: "example" property type must be object
-- oas2-schema: "x" property must have required property "schema".
-- oas2-schema: "x" property must have required property "name".
-- oas2-schema: "email" property must match format "email".
-- oas2-schema: "Property "x" is not expected to be here."
-- oas2-schema: "get" property must have required property "responses".
-- oas2-schema: "post" property must have required property "responses".
-- oas2-schema: "put" property must have required property "responses".
-- oas2-schema: Invalid security securityDefinitions.
-- oas2-schema: "x" property must have required property "description".
-- oas2-schema: "x" property must not have duplicate items (items ## y and z are identical).
-- oas2-schema: "responses" property must not be valid.
-- oas2-schema: "x" property must be equal to one of the allowed values.
-- oas2-schema: "type" property must be equal to one of the allowed values: "array", "boolean", "integer", "null", "number", "object", "string". Did you mean "array"?.
-- oas2-schema: "schema" property must have required property "type".
+- extraInfo (oas2-schema): Property "extraInfo" is not expected to be here.
