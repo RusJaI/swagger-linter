@@ -17,6 +17,7 @@ import {
   logL1Warnings,
   logErrorOutput,
   extractJavaClientOutput,
+  improveErrorMessages,
 } from "./util.js";
 
 let rulesetFilepath = "";
@@ -113,6 +114,8 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       // Supress extra extraInfo errors
       [result, warnList] = disableExtraInfoValidation(result);
       level1WarnList = [...level1WarnList, ...warnList];
+
+      improveErrorMessages(result);
   
       if (isValid) {
         if (result.length > 0 || level1WarnList.length > 0) {
@@ -155,6 +158,8 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         delete r.severity;
         delete r.range;
       });
+
+      improveErrorMessages(result);
       
       if (result.length > 0) {
         await logErrorOutput(result);
