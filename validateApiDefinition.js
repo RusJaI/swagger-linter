@@ -21,6 +21,7 @@ import {
   disableErrorsBasedOnRuleCode,
   logL1Warnings,
   logErrorOutput,
+  extractJavaClientOutput,
 } from "./util.js";
 
 let rulesetFilepath = "";
@@ -70,17 +71,17 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
     const javaClientOutput = await new Promise((resolve, reject) => {
       jarProcess.on('close', () => {
-        const output = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
+        const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
 
         // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
         let isValid;
         const regex = /Total Successful Files Count (\d+)/;
-        const match = output.match(regex);
+        const match = javaClientStdout.match(regex);
         if (match) {
           const successfulFileCount = parseInt(match[1], 10);
           successfulFileCount === 1 ? (isValid = true) : (isValid = false);
           fs.unlinkSync(tempFilePath); // Delete the temporary file
-          resolve(isValid);
+          resolve([isValid, javaClientStdout]);
         } else {
           console.log(`Failed to get the successful file count from the java client output`);
           reject(new Error('Invalid Java client output'));
@@ -88,7 +89,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       });
     });
 
-    const isValid = await javaClientOutput;
+    const [isValid, javaClientStdout] = await javaClientOutput;
 
     console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
 
@@ -186,7 +187,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
         await logErrorOutput(result);
         await logL1Warnings(validationLevel, level1WarnList);
       } else {
-        console.log('Need to output java client error');
+        extractJavaClientOutput(javaClientStdout)
       }
 
       console.log(chalk.red.bold("\nValidation Failed\n"));

@@ -164,3 +164,8 @@ export const logErrorOutput = async (result) => {
     });
   }
 };
+
+// Function to extract java client output if spectral linter shows no errors for an API definition that the java client identified as errorneous
+export const extractJavaClientOutput = async (javaClientOutput) => {
+    console.log(javaClientOutput);
+}
