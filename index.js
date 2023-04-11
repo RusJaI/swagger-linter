@@ -5,7 +5,6 @@ import { Command } from 'commander';
 import chalk from "chalk";
 import { validateDefinition } from './validateApiDefinition.js';
 
-
 // Collect provided args
 const program = new Command();
 program
@@ -76,7 +75,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
                                 console.error(chalk.red.bold("Error: ") + "Unable to read file: " + file);
                                 reject(err);
                             }
-                            const pathToDefinitionForJavaClient = swaggerDirectory + '/' + file;
+                            const pathToDefinitionForJavaClient = swaggerDirectory + '/' + file;      
                             const isDefinitionValid = await validateDefinition(data, file, level, pathToDefinitionForJavaClient);
                             if (isDefinitionValid) {
                                 validFileCount++;
