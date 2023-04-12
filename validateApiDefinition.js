@@ -14,6 +14,7 @@ import {
   disableHostValidation,
   disableBasePathValidation,
   disableExtraInfoValidation,
+  disableErrorsThatMatchProvidedMessage,
   logL1Warnings,
   logErrorOutput,
   extractJavaClientOutput,
@@ -113,6 +114,14 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
 
       // Supress extra extraInfo errors
       [result, warnList] = disableExtraInfoValidation(result);
+      level1WarnList = [...level1WarnList, ...warnList];
+
+      // Suppress example property related validation errors
+      const errorsToDisable = [
+        '"example" property type must be string',
+        '"example" property type must be integer',
+      ];
+      [result, warnList] = disableErrorsThatMatchProvidedMessage(result, errorsToDisable);
       level1WarnList = [...level1WarnList, ...warnList];
 
       improveErrorMessages(result);
