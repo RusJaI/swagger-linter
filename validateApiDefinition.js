@@ -14,6 +14,7 @@ import {
   disableHostValidation,
   disableBasePathValidation,
   disableExtraInfoValidation,
+  disableErrorsThatMatchProvidedMessage,
   logL1Warnings,
   logErrorOutput,
   extractJavaClientOutput,
@@ -46,9 +47,34 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     await bundleAndLoadRuleset(rulesetFilepath, { fs, fetch })
   );
 
+  // Check if the definition specifies a valid version field
+  let versionError = null;
+  try {
+    const apiData = JSON.parse(apiDefinition)
+
+    const isSwaggerVersionValid = apiData.swagger && apiData.swagger === '2.0';
+    const isOpenApiVersionValid = apiData.openapi && apiData.openapi.match(/^3\.0\.\d+$/);
+
+    if (!(isSwaggerVersionValid || isOpenApiVersionValid)) {
+      // Invalid version field detected
+      versionError = {
+        code: 'invalid-version-field',
+        message: 'The Swagger or OpenAPI version field is not valid. Supported version fields are swagger: "2.0" and those that match openapi: 3.0.n (for example, openapi: 3.0.0).',
+        path: [''],
+        severity: 0,
+      };
+    }
+  } catch (error) {
+    // Version field is not validated if the definition is not a valid json
+  }
+
   if (validationLevel === 1) {
     return spectral.run(myDocument).then(async (result) => {
       let level1WarnList = [];
+
+      if (versionError !== null) {
+        result.push(versionError);
+      }
   
       // Run the Java client to validate the API definition
       const pathToDef = 'location:' + pathToDefinitionForJavaClient;
@@ -115,6 +141,14 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       [result, warnList] = disableExtraInfoValidation(result);
       level1WarnList = [...level1WarnList, ...warnList];
 
+      // Suppress example property related validation errors
+      const errorsToDisable = [
+        '"example" property type must be string',
+        '"example" property type must be integer',
+      ];
+      [result, warnList] = disableErrorsThatMatchProvidedMessage(result, errorsToDisable);
+      level1WarnList = [...level1WarnList, ...warnList];
+
       improveErrorMessages(result);
   
       if (isValid) {
@@ -147,6 +181,11 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
   } else {
     return spectral.run(myDocument).then(async (result) => {
       console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
+      
+      if (versionError !== null) {
+        result.push(versionError);
+      }
+
       // Iterate the results and select only those with severity of 0 (i.e. errors)
       result = result.filter((r) => r.severity === 0);
 

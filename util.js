@@ -6,7 +6,7 @@ export const disableHostValidation = (result) => {
     const warnList = [];
     const resultList = result.filter((r) => {
         if (r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".') {
-            r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
+            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
             warnList.push(r);
             return false;
         } else {
@@ -21,7 +21,7 @@ export const disableBasePathValidation = (result) => {
     const warnList = [];
     const resultList = result.filter((r) => {
         if (r.message === '"basePath" property must match pattern "^/".') {
-            r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
+            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
             warnList.push(r);
             return false;
         } else {
@@ -36,7 +36,7 @@ export const disableExtraInfoValidation = (result) => {
     const warnList = [];
     const resultList = result.filter((r) => {
         if (r.message === 'Property "extraInfo" is not expected to be here.' && r.code === 'oas2-schema') {
-            r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
+            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
             warnList.push(r);
             return false;
         } else {
@@ -46,6 +46,19 @@ export const disableExtraInfoValidation = (result) => {
     return [resultList, warnList];
 };
 
+// Function to disable validation errors with any of the provided error messages
+export const disableErrorsThatMatchProvidedMessage = (result, errorsToDisable) => {
+    const warnList = [];
+    const resultList = result.filter((r) => {
+      const shouldIgnore = errorsToDisable.some((errorMessage) => {
+        return r.message === errorMessage;
+      });
+      shouldIgnore ? warnList.push(r) : null;
+      return !(shouldIgnore);
+    });
+    return [resultList, warnList];
+}
+
 // Function to improve error messages to reflect that "x-" prefix can be used to retain properties
 export const improveErrorMessages = (result) => {
     result.forEach((r) => {
@@ -54,7 +67,7 @@ export const improveErrorMessages = (result) => {
             r.message === 'Property "basePath" is not expected to be here.' ||
             r.message === 'Property "extraInfo" is not expected to be here.'
         ) {
-            r.message = r.message + ' You can retain this propery by using the "x-" prefix.';
+            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
         }
     });
     return result;
