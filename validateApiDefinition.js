@@ -154,7 +154,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       if (isValid) {
         if (result.length > 0 || level1WarnList.length > 0) {
           console.log(
-            "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.0.0 will " +
+            "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.2.0 will " +
             chalk.green("ACCEPT") + " this API definition.\n"
           );
         }
@@ -164,14 +164,16 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
   
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
-        console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.0.0 will " +
+        console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.2.0 will " +
         chalk.red("NOT ACCEPT") + " this API definition.\n");
   
+        console.log(chalk.blue("\nAPI Manager Backend validation results : \n"));
+        extractJavaClientOutput(javaClientStdout)
+
         if (result.length > 0 || level1WarnList.length > 0) {
+          console.log(chalk.blue("\nLinter validation results : \n"));
           await logErrorOutput(result);
           await logL1Warnings(validationLevel, level1WarnList);
-        } else {
-          extractJavaClientOutput(javaClientStdout)
         }
   
         console.log(chalk.red.bold("\nValidation Failed\n"));
