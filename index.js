@@ -18,22 +18,23 @@ program
   )
   .option(
     "-l, --validationLevel [value]",
-    "Validation level: 1 or 2 (default is 2)\n\t\t\t\t \
-    1 - validate as in WSO2 API Manager 4.0.0\n\t\t\t\t \
-    2 - validation enabled"
+    "Validation level: relaxed, linter or apim (default is apim)\n\t\t\t\t \
+    relaxed - validate only verify whether the swagger/openAPI definition is returned by the validator\n\t\t\t\t \
+    linter - validate as per spectral linter rules used in API Manager 4.2.0\n\t\t\t\t \
+    apim - validate as in WSO2 API Manager 4.2.0"
   )
   .parse(process.argv);
 
 const {
     swaggerFile = "",
     swaggerDirectory = "",
-    validationLevel = 2
+    validationLevel = "apim"
 } = program.opts();
 
 // Check if the validation level is valid
-const level = parseInt(validationLevel);
-if (level !== 1 && level !== 2) {
-    console.error(chalk.red.bold("Error: ") + "Invalid validation level detected. Provided validation level: " + level + " (Should be either 1 or 2)");
+const level = validationLevel;
+if (level !== "relaxed".toLowerCase() && level !== "linter".toLowerCase() && level !== "apim".toLowerCase()) {
+    console.error(chalk.red.bold("Error: ") + "Invalid validation level detected. Provided validation level: " + level + " (Should be relaxed, linter or apim)");
     process.exit(1);
 }
 
@@ -41,7 +42,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
     // Load API specification file that was provided as a command line argument
     try {
         let apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
-        validateDefinition(apiDefinition, swaggerFile, level);
+        validateDefinition(apiDefinition, swaggerFile, level.toLowerCase());
     } catch (err) {
         if (err.code === "ENOENT") {
             console.error(chalk.red.bold("Error: ") + "File not found: " + swaggerFile);
@@ -76,7 +77,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
                                 reject(err);
                             }
                             const pathToDefinitionForJavaClient = swaggerDirectory + '/' + file;      
-                            const isDefinitionValid = await validateDefinition(data, file, level, pathToDefinitionForJavaClient);
+                            const isDefinitionValid = await validateDefinition(data, file, level.toLowerCase(), pathToDefinitionForJavaClient);
                             if (isDefinitionValid) {
                                 validFileCount++;
                             } else {

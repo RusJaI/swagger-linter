@@ -27,9 +27,9 @@ const jarPath = path.join(__dirname, '/java-client/apim-swagger-validator-1.0.0.
 
 // Populate the ruleset file path depending on the validation level
 async function populateRulesetFilepath(validationLevel) {
-  if (validationLevel == 1) {
+  if (validationLevel == "apim" | validationLevel == "relaxed") {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level1.spectral.yaml");
-  } else if (validationLevel == 2) {
+  } else if (validationLevel == "linter") {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level2.spectral.yaml");
   }
 }
@@ -68,7 +68,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     // Version field is not validated if the definition is not a valid json
   }
 
-  if (validationLevel === 1) {
+  if (validationLevel === "apim" || validationLevel === "relaxed") {
     return spectral.run(myDocument).then(async (result) => {
       let level1WarnList = [];
 
@@ -78,7 +78,10 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
   
       // Run the Java client to validate the API definition
       const pathToDef = 'location:' + pathToDefinitionForJavaClient;
-      const validationLevelForJavaClient = 1;
+      var validationLevelForJavaClient = 1;
+      if (validationLevel === "relaxed") {
+        validationLevelForJavaClient = 0;
+      } 
       const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
   
       const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
