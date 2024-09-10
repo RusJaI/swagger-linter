@@ -4,9 +4,11 @@
 
 You can validate API definition(s) using either validation level 1 or 2;
 - **Validation level 1**: validate API definition(s) as in WSO2 API Manager 4.0.0
-- **Validation level 2**: Fully validate API definition(s)
+- **Validation level 2**: validate API definition(s) as in WSO2 API Manager 4.2.0
 
 ## Usage
+
+Use Node version 16 
 
 Clone this repo and run the following commnds
 

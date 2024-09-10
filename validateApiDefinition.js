@@ -95,7 +95,7 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
       jarProcess.on('close', () => {
         const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
 
-        // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
+        // Analyse java client output to check whether the provided API definition is accepted by API Manager
         let isValid;
         const regex = /Total Successful Files Count (\d+)/;
         const match = javaClientStdout.match(regex);
