@@ -27,9 +27,9 @@ const jarPath = path.join(__dirname, '/java-client/apim-swagger-validator-1.0.0.
 
 // Populate the ruleset file path depending on the validation level
 async function populateRulesetFilepath(validationLevel) {
-  if (validationLevel == "apim" | validationLevel == "relaxed") {
+  if (validationLevel == 1) {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level1.spectral.yaml");
-  } else if (validationLevel == "linter") {
+  } else if (validationLevel == 2) {
     rulesetFilepath = path.join(__dirname, "/Rulesets/level2.spectral.yaml");
   }
 }
@@ -68,151 +68,116 @@ export const validateDefinition = async (apiDefinition, fileName, validationLeve
     // Version field is not validated if the definition is not a valid json
   }
 
-  if (validationLevel === "apim" || validationLevel === "relaxed") {
-    return spectral.run(myDocument).then(async (result) => {
-      let level1WarnList = [];
+  return spectral.run(myDocument).then(async (result) => {
+    let level1WarnList = [];
 
-      if (versionError !== null) {
-        result.push(versionError);
-      }
-  
-      // Run the Java client to validate the API definition
-      const pathToDef = 'location:' + pathToDefinitionForJavaClient;
-      var validationLevelForJavaClient = 1;
-      if (validationLevel === "relaxed") {
-        validationLevelForJavaClient = 0;
-      } 
-      const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
-  
-      const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
-      const tempFilePath = path.join(os.tmpdir(), tempFileName);
-      const writeStream = fs.createWriteStream(tempFilePath);
-  
-      const jarProcess = spawn('java', javaArgs);
-      jarProcess.stdout.pipe(writeStream);
-      jarProcess.stderr.on('data', (data) => {
-        console.error(data.toString());
-      });
-  
-      const javaClientOutput = await new Promise((resolve, reject) => {
-        jarProcess.on('close', () => {
-          const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
-  
-          // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
-          let isValid;
-          const regex = /Total Successful Files Count (\d+)/;
-          const match = javaClientStdout.match(regex);
-          if (match) {
-            const successfulFileCount = parseInt(match[1], 10);
-            successfulFileCount === 1 ? (isValid = true) : (isValid = false);
-            fs.unlinkSync(tempFilePath); // Delete the temporary file
-            resolve([isValid, javaClientStdout]);
-          } else {
-            console.log(`Failed to get the successful file count from the java client output`);
-            reject(new Error('Invalid Java client output'));
-          }
-        });
-      });
-  
-      const [isValid, javaClientStdout] = await javaClientOutput;
-  
-      console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
-  
-      // Iterate the results and select only those with severity of 0 (i.e. errors)
-      result = result.filter((r) => r.severity === 0);
-  
-      // Replace the path field with a string representation of the path
-      result.forEach((r) => (r.path = r.path.join(".")));
-  
-      // Remove code, severity and range fields from the result as those add no value to the output
-      result.forEach((r) => {
-        delete r.severity;
-        delete r.range;
-      });
-  
-      let warnList;
+    if (versionError !== null) {
+      result.push(versionError);
+    }
 
-      // Supress host validation errors
-      [result, warnList] = disableHostValidation(result);
-      level1WarnList = [...level1WarnList, ...warnList];
+    // Run the Java client to validate the API definition
+    const pathToDef = 'location:' + pathToDefinitionForJavaClient;
+    var validationLevelForJavaClient = validationLevel;
+    
+    const javaArgs = ['-jar', jarPath, pathToDef, validationLevelForJavaClient];
 
-      // Supress basePath validation errors
-      [result, warnList] = disableBasePathValidation(result);
-      level1WarnList = [...level1WarnList, ...warnList];
+    const tempFileName = `output-${Date.now()}.txt`; // Generate a unique temporary file name
+    const tempFilePath = path.join(os.tmpdir(), tempFileName);
+    const writeStream = fs.createWriteStream(tempFilePath);
 
-      // Supress extra extraInfo errors
-      [result, warnList] = disableExtraInfoValidation(result);
-      level1WarnList = [...level1WarnList, ...warnList];
+    const jarProcess = spawn('java', javaArgs);
+    jarProcess.stdout.pipe(writeStream);
+    jarProcess.stderr.on('data', (data) => {
+      console.error(data.toString());
+    });
 
-      // Suppress example property related validation errors
-      const errorsToDisable = [
-        '"example" property type must be string',
-        '"example" property type must be integer',
-      ];
-      [result, warnList] = disableErrorsThatMatchProvidedMessage(result, errorsToDisable);
-      level1WarnList = [...level1WarnList, ...warnList];
+    const javaClientOutput = await new Promise((resolve, reject) => {
+      jarProcess.on('close', () => {
+        const javaClientStdout = fs.readFileSync(tempFilePath, 'utf8'); // Read the contents of the temporary file
 
-      improveErrorMessages(result);
-  
-      if (isValid) {
-        if (result.length > 0 || level1WarnList.length > 0) {
-          console.log(
-            "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.2.0 will " +
-            chalk.green("ACCEPT") + " this API definition.\n"
-          );
+        // Analyse java client output to check whether the provided API definition is accepted by APIM 4.0.0
+        let isValid;
+        const regex = /Total Successful Files Count (\d+)/;
+        const match = javaClientStdout.match(regex);
+        if (match) {
+          const successfulFileCount = parseInt(match[1], 10);
+          successfulFileCount === 1 ? (isValid = true) : (isValid = false);
+          fs.unlinkSync(tempFilePath); // Delete the temporary file
+          resolve([isValid, javaClientStdout]);
+        } else {
+          console.log(`Failed to get the successful file count from the java client output`);
+          reject(new Error('Invalid Java client output'));
         }
-  
+      });
+    });
+
+    const [isValid, javaClientStdout] = await javaClientOutput;
+
+    console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
+
+    // Iterate the results and select only those with severity of 0 (i.e. errors)
+    result = result.filter((r) => r.severity === 0);
+
+    // Replace the path field with a string representation of the path
+    result.forEach((r) => (r.path = r.path.join(".")));
+
+    // Remove code, severity and range fields from the result as those add no value to the output
+    result.forEach((r) => {
+      delete r.severity;
+      delete r.range;
+    });
+
+    let warnList;
+
+    // Supress host validation errors
+    [result, warnList] = disableHostValidation(result);
+    level1WarnList = [...level1WarnList, ...warnList];
+
+    // Supress basePath validation errors
+    [result, warnList] = disableBasePathValidation(result);
+    level1WarnList = [...level1WarnList, ...warnList];
+
+    // Supress extra extraInfo errors
+    [result, warnList] = disableExtraInfoValidation(result);
+    level1WarnList = [...level1WarnList, ...warnList];
+
+    // Suppress example property related validation errors
+    const errorsToDisable = [
+      '"example" property type must be string',
+      '"example" property type must be integer',
+    ];
+    [result, warnList] = disableErrorsThatMatchProvidedMessage(result, errorsToDisable);
+    level1WarnList = [...level1WarnList, ...warnList];
+
+    improveErrorMessages(result);
+
+    if (isValid) {
+      if (result.length > 0 || level1WarnList.length > 0) {
+        console.log(
+          "\u2757 Validation passed with the below-listed errors, using may lead to functionality issues. API Manager 4.2.0 will " +
+          chalk.green("ACCEPT") + " this API definition.\n"
+        );
+      }
+
+      await logErrorOutput(result);
+      await logL1Warnings(validationLevel, level1WarnList);
+
+      console.log(chalk.green.bold("\nValidation Passed\n"));
+    } else {
+      console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.2.0 will " +
+      chalk.red("NOT ACCEPT") + " this API definition.\n");
+
+      console.log(chalk.blue("\nAPI Manager Backend validation results : \n"));
+      extractJavaClientOutput(javaClientStdout)
+
+      if (result.length > 0 || level1WarnList.length > 0) {
+        console.log(chalk.blue("\nLinter validation results : \n"));
         await logErrorOutput(result);
         await logL1Warnings(validationLevel, level1WarnList);
-  
-        console.log(chalk.green.bold("\nValidation Passed\n"));
-      } else {
-        console.log("\u2757 Validation failed with the below-listed errors. API Manager 4.2.0 will " +
-        chalk.red("NOT ACCEPT") + " this API definition.\n");
-  
-        console.log(chalk.blue("\nAPI Manager Backend validation results : \n"));
-        extractJavaClientOutput(javaClientStdout)
-
-        if (result.length > 0 || level1WarnList.length > 0) {
-          console.log(chalk.blue("\nLinter validation results : \n"));
-          await logErrorOutput(result);
-          await logL1Warnings(validationLevel, level1WarnList);
-        }
-  
-        console.log(chalk.red.bold("\nValidation Failed\n"));
-      }
-      return isValid;
-    });
-  } else {
-    return spectral.run(myDocument).then(async (result) => {
-      console.log("\n\u25A1 Validating " + fileName + " using validation level " + validationLevel + " ...\n");
-      
-      if (versionError !== null) {
-        result.push(versionError);
       }
 
-      // Iterate the results and select only those with severity of 0 (i.e. errors)
-      result = result.filter((r) => r.severity === 0);
-
-      // Replace the path field with a string representation of the path
-      result.forEach((r) => (r.path = r.path.join(".")));
-  
-      // Remove code, severity and range fields from the result as those add no value to the output
-      result.forEach((r) => {
-        delete r.severity;
-        delete r.range;
-      });
-
-      improveErrorMessages(result);
-      
-      if (result.length > 0) {
-        await logErrorOutput(result);
-        console.log(chalk.red.bold("\nValidation Failed\n"));
-        return false;
-      } else {
-        console.log(chalk.green.bold("\nValidation Passed\n"));
-        return true;
-      }
-    });
-  }
+      console.log(chalk.red.bold("\nValidation Failed\n"));
+    }
+    return isValid;
+  });
 };
