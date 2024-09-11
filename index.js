@@ -19,8 +19,8 @@ program
   .option(
     "-l, --validationLevel [value]",
     "Validation level: 1 or 2 (default is 2)\n\t\t\t\t \
-    1 - validate as in level 1 validation of WSO2 API Manager 4.0.0\n\t\t\t\t \
-    2 - validate as in WSO2 API Manager 4.2.0"
+    1 - Validate as in Relaxed Validation enabled mode in WSO2 API Manager 4.2.0\n\t\t\t\t \
+    2 - Validate as in default mode of WSO2 API Manager 4.2.0"
   )
   .parse(process.argv);
 
