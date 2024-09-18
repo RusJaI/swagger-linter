@@ -3,74 +3,87 @@ import chalk from "chalk";
 
 // Function to disable host property validation
 export const disableHostValidation = (result) => {
-    const warnList = [];
-    const resultList = result.filter((r) => {
-        if (r.message === '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".') {
-            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
-            warnList.push(r);
-            return false;
-        } else {
-            return true;
-        }
-    });
-    return [resultList, warnList];
+  const warnList = [];
+  const resultList = result.filter((r) => {
+    if (
+      r.message ===
+      '"host" property must match pattern "^[^{}/ :\\\\]+(?::\\d+)?$".'
+    ) {
+      r.message =
+        r.message + ' You can retain this property by using the "x-" prefix.';
+      warnList.push(r);
+      return false;
+    } else {
+      return true;
+    }
+  });
+  return [resultList, warnList];
 };
 
 // Function to disable basePath property validation
 export const disableBasePathValidation = (result) => {
-    const warnList = [];
-    const resultList = result.filter((r) => {
-        if (r.message === '"basePath" property must match pattern "^/".') {
-            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
-            warnList.push(r);
-            return false;
-        } else {
-            return true;
-        }
-    });
-    return [resultList, warnList];
+  const warnList = [];
+  const resultList = result.filter((r) => {
+    if (r.message === '"basePath" property must match pattern "^/".') {
+      r.message =
+        r.message + ' You can retain this property by using the "x-" prefix.';
+      warnList.push(r);
+      return false;
+    } else {
+      return true;
+    }
+  });
+  return [resultList, warnList];
 };
 
 // Function to disable extraInfo property validation
 export const disableExtraInfoValidation = (result) => {
-    const warnList = [];
-    const resultList = result.filter((r) => {
-        if (r.message === 'Property "extraInfo" is not expected to be here.' && r.code === 'oas2-schema') {
-            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
-            warnList.push(r);
-            return false;
-        } else {
-            return true;
-        }
-    });
-    return [resultList, warnList];
+  const warnList = [];
+  const resultList = result.filter((r) => {
+    if (
+      r.message === 'Property "extraInfo" is not expected to be here.' &&
+      r.code === "oas2-schema"
+    ) {
+      r.message =
+        r.message + ' You can retain this property by using the "x-" prefix.';
+      warnList.push(r);
+      return false;
+    } else {
+      return true;
+    }
+  });
+  return [resultList, warnList];
 };
 
 // Function to disable validation errors with any of the provided error messages
-export const disableErrorsThatMatchProvidedMessage = (result, errorsToDisable) => {
-    const warnList = [];
-    const resultList = result.filter((r) => {
-      const shouldIgnore = errorsToDisable.some((errorMessage) => {
-        return r.message === errorMessage;
-      });
-      shouldIgnore ? warnList.push(r) : null;
-      return !(shouldIgnore);
+export const disableErrorsThatMatchProvidedMessage = (
+  result,
+  errorsToDisable
+) => {
+  const warnList = [];
+  const resultList = result.filter((r) => {
+    const shouldIgnore = errorsToDisable.some((errorMessage) => {
+      return r.message === errorMessage;
     });
-    return [resultList, warnList];
-}
+    shouldIgnore ? warnList.push(r) : null;
+    return !shouldIgnore;
+  });
+  return [resultList, warnList];
+};
 
 // Function to improve error messages to reflect that "x-" prefix can be used to retain properties
 export const improveErrorMessages = (result) => {
-    result.forEach((r) => {
-        if (
-            r.message === 'Property "host" is not expected to be here.' ||
-            r.message === 'Property "basePath" is not expected to be here.' ||
-            r.message === 'Property "extraInfo" is not expected to be here.'
-        ) {
-            r.message = r.message + ' You can retain this property by using the "x-" prefix.';
-        }
-    });
-    return result;
+  result.forEach((r) => {
+    if (
+      r.message === 'Property "host" is not expected to be here.' ||
+      r.message === 'Property "basePath" is not expected to be here.' ||
+      r.message === 'Property "extraInfo" is not expected to be here.'
+    ) {
+      r.message =
+        r.message + ' You can retain this property by using the "x-" prefix.';
+    }
+  });
+  return result;
 };
 
 // Function to log output of L1 warnings
@@ -91,7 +104,7 @@ export const logL1Warnings = async (validationLevel, level1WarnList) => {
       console.log(chalk.yellowBright.bold("\n~ L1 Warnings ~"));
       console.log(
         chalk.yellowBright.bold(level1WarnList.length) +
-          chalk.yellowBright(" warning(s) found in the API definition")
+        chalk.yellowBright(" warning(s) found in the API definition")
       );
       console.log(warnTable.toString());
       resolve();
@@ -115,7 +128,7 @@ export const logErrorOutput = async (result) => {
 
     console.log(
       chalk.red.bold(result.length) +
-        chalk.red(" error(s) found in the API definition\n")
+      chalk.red(" error(s) found in the API definition\n")
     );
 
     await new Promise((resolve) => {
@@ -127,5 +140,5 @@ export const logErrorOutput = async (result) => {
 
 // Function to extract java client output if spectral linter shows no errors for an API definition that the java client identified as errorneous
 export const extractJavaClientOutput = async (javaClientOutput) => {
-    console.log(javaClientOutput);
-}
+  console.log(javaClientOutput);
+};
