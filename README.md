@@ -18,10 +18,10 @@ Clone this repo and run the following commnds
 
 Validate provided Swagger or OpenAPI definition
 
-`swagger-linter-420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2]`
+`swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2]`
 
 or
 
 Validate a directory of Swagger definitions and/or OpenAPI definitions
 
-`swagger-linter-420 -d [path to directory with API definitions] -l [validation level 1 or 2]`
+`swagger-linter_420 -d [path to directory with API definitions] -l [validation level 1 or 2]`
