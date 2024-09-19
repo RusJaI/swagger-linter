@@ -6,7 +6,7 @@ You can validate API definition(s) using either validation level 1 or 2;
 - **Validation level 1**: validate API definition(s) as in WSO2 API Manager 4.2.0 when Relaxed Validation enabled
 - **Validation level 2**: validate API definition(s) as in WSO2 API Manager 4.2.0
 
-## Usage
+## if you are building the source code and use this
 
 Use Node version 16 
 
@@ -26,9 +26,11 @@ Validate a directory of Swagger definitions and/or OpenAPI definitions
 
 `swagger-linter_420 -d [path to directory with API definitions] -l [validation level 1 or 2]`
 
-## If you are using npm packagge directly
+## If you are using npm package directly
 
-Open a terminal in your working directy. Follow the bellow steps using node version 16
+(URL : https://www.npmjs.com/package/swagger-linter_420)
+
+Open a terminal in your working directory. Follow the below steps using node version 16
 
 - Install the npm package using the command ```npm i swagger-linter_420```
 - Enter the following command 
