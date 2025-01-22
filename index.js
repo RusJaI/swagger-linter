@@ -22,16 +22,24 @@ program
     1 - Validate as in Relaxed Validation enabled mode in WSO2 API Manager 4.2.0\n\t\t\t\t \
     2 - Validate as in default mode of WSO2 API Manager 4.2.0"
     )
+    .option(
+        "-c, --csv [value]",
+        "Enable output results in CSV file\n\t\t\t\t \
+        0 - Disabel csv output write\n\t\t\t\t \
+        1 - Enable csv output write"
+    )
     .parse(process.argv);
 
 const {
     swaggerFile = "",
     swaggerDirectory = "",
     validationLevel = 2,
+    csv = 0
 } = program.opts();
 
 // Check if the validation level is valid
 const level = parseInt(validationLevel);
+const csvLevel = parseInt(csv);
 if (level !== 1 && level !== 2) {
     console.error(
         chalk.red.bold("Error: ") +
@@ -46,7 +54,8 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
     // Load API specification file that was provided as a command line argument
     try {
         let apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
-        validateDefinition(apiDefinition, swaggerFile, level);
+          validateDefinition(apiDefinition, swaggerFile, level ,csvLevel);
+
     } catch (err) {
         if (err.code === "ENOENT") {
             console.error(
@@ -107,6 +116,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
                                     data,
                                     file,
                                     level,
+                                    csvLevel,
                                     pathToDefinitionForJavaClient
                                 );
                                 if (isDefinitionValid) {

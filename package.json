@@ -1,6 +1,6 @@
 {
   "name": "swagger-linter_420",
-  "version": "1.0.6",
+  "version": "1.0.3",
   "description": "Validate Swagger or OpenAPI definitions as per WSO2 API Manager 4.2.0",
   "main": "index.js",
   "bin": {
@@ -30,6 +30,7 @@
     "chalk": "^5.2.0",
     "child_process": "^1.0.2",
     "cli-table": "^0.3.11",
-    "commander": "^10.0.0"
+    "commander": "^10.0.0",
+    "json2csv": "^6.0.0-alpha.2"
   }
 }

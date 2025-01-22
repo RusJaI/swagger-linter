@@ -12,6 +12,7 @@ import {
   logErrorOutput,
   extractJavaClientOutput,
   improveErrorMessages,
+  writeToCsv,
 } from "./util.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,6 +25,7 @@ export const validateDefinition = async (
   apiDefinition,
   fileName,
   validationLevel,
+  csv,
   pathToDefinitionForJavaClient = fileName
 ) => {
   // Run the spectral linter validation
@@ -140,8 +142,8 @@ export const validateDefinition = async (
             " this API definition.\n"
           );
         }
-
-        await logErrorOutput(result);
+        //writeToCsv(fileName,result);
+        await logErrorOutput(result,fileName,csv);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -154,11 +156,13 @@ export const validateDefinition = async (
         console.log(
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
-        extractJavaClientOutput(javaClientStdout);
+        //writeToCsv(fileName,javaClientStdout);
+        extractJavaClientOutput(javaClientStdout,fileName,csv)
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
-          await logErrorOutput(result);
+          //writeToCsv(fileName,result);
+          await logErrorOutput(result,fileName,csv);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));
@@ -246,8 +250,8 @@ export const validateDefinition = async (
             " this API definition.\n"
           );
         }
-
-        await logErrorOutput(result);
+        //writeToCsv(fileName,result);
+        await logErrorOutput(result,fileName,csv);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -260,11 +264,14 @@ export const validateDefinition = async (
         console.log(
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
-        extractJavaClientOutput(javaClientStdout);
+        //writeToCsv(fileName,javaClientStdout);
+        extractJavaClientOutput(javaClientStdout,fileName,csv)
+
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
-          await logErrorOutput(result);
+          //writeToCsv(fileName,result);
+          await logErrorOutput(result,fileName,csv);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));

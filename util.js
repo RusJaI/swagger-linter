@@ -1,5 +1,33 @@
+import fs from "fs";
 import Table from "cli-table";
 import chalk from "chalk";
+import path from "path";
+import { parse } from "json2csv"; // You can use the `json2csv` library for CSV formatting
+
+// Define a file to store the output
+const OUTPUT_FILE = "output.csv";
+
+// Function to initialize or append to the CSV file
+export const writeToCsv = (fileName, data) => {
+  const fileExists = fs.existsSync(OUTPUT_FILE);
+
+  const csvData = data.map((row) => ({
+    fileName,
+    Rule: row.code || "",
+    Path: row.path || "",
+    ErrorMessage: row.message || row.ErrorMessage || "",
+  }));
+
+  const csv = parse(csvData, { header: !fileExists });
+
+  if (fileExists) {
+    // Append without headers
+    fs.appendFileSync(OUTPUT_FILE, "\n" + csv);
+  } else {
+    // Write with headers
+    fs.writeFileSync(OUTPUT_FILE, csv);
+  }
+};
 
 // Function to improve error messages to reflect that "x-" prefix can be used to retain properties
 export const improveErrorMessages = (result) => {
@@ -16,10 +44,11 @@ export const improveErrorMessages = (result) => {
   return result;
 };
 
-// Function to log error ouptput
-export const logErrorOutput = async (result) => {
+// Function to log error output
+export const logErrorOutput = async (result, fileName,csv) => {
   if (result.length > 0) {
     // Output table format for Errors
+    console.log(result);
     const table = new Table({
       head: ["Rule", "Path", "Error Message"],
       style: {
@@ -32,17 +61,29 @@ export const logErrorOutput = async (result) => {
 
     console.log(
       chalk.red.bold(result.length) +
-      chalk.red(" error(s) found in the API definition\n")
+        chalk.red(" error(s) found in the API definition\n")
     );
 
     await new Promise((resolve) => {
       console.log(table.toString());
       resolve();
     });
+  if (csv === 1)
+    writeToCsv(fileName, result);
+
   }
 };
 
-// Function to extract java client output if spectral linter shows no errors for an API definition that the java client identified as errorneous
-export const extractJavaClientOutput = async (javaClientOutput) => {
+// Function to extract Java client output if the spectral linter shows no errors
+export const extractJavaClientOutput = async (javaClientOutput, fileName, csv) => {
   console.log(javaClientOutput);
+  // to convert to a csv file
+  const result = javaClientOutput.split("\n").map((line) => {
+    const [id, ...errorMessage] = line.split(/\s+/);
+    return { code: id,  message: errorMessage.join(" "), path: "" };
+  });
+   console.log(result);
+  // Write to CSV
+  if (csv === 1)
+  writeToCsv(fileName, result);
 };
