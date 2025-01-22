@@ -48,7 +48,7 @@ export const improveErrorMessages = (result) => {
 export const logErrorOutput = async (result, fileName,csv) => {
   if (result.length > 0) {
     // Output table format for Errors
-    console.log(result);
+//    console.log(result);
     const table = new Table({
       head: ["Rule", "Path", "Error Message"],
       style: {
@@ -82,7 +82,7 @@ export const extractJavaClientOutput = async (javaClientOutput, fileName, csv) =
     const [id, ...errorMessage] = line.split(/\s+/);
     return { code: id,  message: errorMessage.join(" "), path: "" };
   });
-   console.log(result);
+//   console.log(result);
   // Write to CSV
   if (csv === 1)
   writeToCsv(fileName, result);
