@@ -25,7 +25,7 @@ export const validateDefinition = async (
   apiDefinition,
   fileName,
   validationLevel,
-  csv,
+  format,
   pathToDefinitionForJavaClient = fileName
 ) => {
   // Run the spectral linter validation
@@ -143,7 +143,7 @@ export const validateDefinition = async (
           );
         }
         //writeToCsv(fileName,result);
-        await logErrorOutput(result,fileName,csv);
+        await logErrorOutput(result,fileName,format);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -157,12 +157,12 @@ export const validateDefinition = async (
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
         //writeToCsv(fileName,javaClientStdout);
-        extractJavaClientOutput(javaClientStdout,fileName,csv)
+        extractJavaClientOutput(javaClientStdout,fileName,format)
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
           //writeToCsv(fileName,result);
-          await logErrorOutput(result,fileName,csv);
+          await logErrorOutput(result,fileName,format);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));
@@ -251,7 +251,7 @@ export const validateDefinition = async (
           );
         }
         //writeToCsv(fileName,result);
-        await logErrorOutput(result,fileName,csv);
+        await logErrorOutput(result,fileName,format);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -265,13 +265,13 @@ export const validateDefinition = async (
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
         //writeToCsv(fileName,javaClientStdout);
-        extractJavaClientOutput(javaClientStdout,fileName,csv)
+        extractJavaClientOutput(javaClientStdout,fileName,format)
 
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
           //writeToCsv(fileName,result);
-          await logErrorOutput(result,fileName,csv);
+          await logErrorOutput(result,fileName,format);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));

@@ -8,7 +8,7 @@ You can validate API definition(s) using either validation level 1 or 2;
 
 If you need to get validation results in to CSV file;
 - add the following argument in the command line
-  `--csv 1`
+  `--format csv`
   
 ## If you are building the source code and use this
 
@@ -22,7 +22,7 @@ Clone this repo and run the following commnds
 
 Validate provided Swagger or OpenAPI definition
 
-`swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2]`
+`swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2] --format [csv]`
 
 or
 

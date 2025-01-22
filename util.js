@@ -45,7 +45,7 @@ export const improveErrorMessages = (result) => {
 };
 
 // Function to log error output
-export const logErrorOutput = async (result, fileName,csv) => {
+export const logErrorOutput = async (result, fileName,format) => {
   if (result.length > 0) {
     // Output table format for Errors
 //    console.log(result);
@@ -68,14 +68,14 @@ export const logErrorOutput = async (result, fileName,csv) => {
       console.log(table.toString());
       resolve();
     });
-  if (csv === 1)
+  if (format === "csv")
     writeToCsv(fileName, result);
 
   }
 };
 
 // Function to extract Java client output if the spectral linter shows no errors
-export const extractJavaClientOutput = async (javaClientOutput, fileName, csv) => {
+export const extractJavaClientOutput = async (javaClientOutput, fileName, format) => {
   console.log(javaClientOutput);
   // to convert to a csv file
   const result = javaClientOutput.split("\n").map((line) => {
@@ -84,6 +84,6 @@ export const extractJavaClientOutput = async (javaClientOutput, fileName, csv) =
   });
 //   console.log(result);
   // Write to CSV
-  if (csv === 1)
+  if (format === "csv")
   writeToCsv(fileName, result);
 };
