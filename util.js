@@ -2,14 +2,16 @@ import fs from "fs";
 import Table from "cli-table";
 import chalk from "chalk";
 import path from "path";
-import { parse } from "json2csv"; // You can use the `json2csv` library for CSV formatting
+import { AsyncParser } from "@json2csv/node"; // Updated to use the new `@json2csv` library
 
 // Define a file to store the output
 const OUTPUT_FILE = "output.csv";
 
+//Define global variable to manage the file write
+let fileExists = fs.existsSync(OUTPUT_FILE);
+
 // Function to initialize or append to the CSV file
-export const writeToCsv = (fileName, data) => {
-  const fileExists = fs.existsSync(OUTPUT_FILE);
+export const writeToCsv = async (fileName, data) => {
 
   const csvData = data.map((row) => ({
     fileName,
@@ -18,14 +20,23 @@ export const writeToCsv = (fileName, data) => {
     ErrorMessage: row.message || row.ErrorMessage || "",
   }));
 
-  const csv = parse(csvData, { header: !fileExists });
+  const opts = { header: !fileExists }; // Add headers only if the file doesn't exist
+  const asyncParser = new AsyncParser(opts);
 
-  if (fileExists) {
-    // Append without headers
-    fs.appendFileSync(OUTPUT_FILE, "\n" + csv);
-  } else {
-    // Write with headers
-    fs.writeFileSync(OUTPUT_FILE, csv);
+  try {
+    // Generate the CSV string
+    const csv = await asyncParser.parse(csvData).promise();
+
+    if (fileExists) {
+      // Append without headers
+      fs.appendFileSync(OUTPUT_FILE, "\n" + csv);
+    } else {
+      // Write with headers
+      fs.writeFileSync(OUTPUT_FILE, csv);
+      fileExists = fs.existsSync(OUTPUT_FILE);
+    }
+  } catch (err) {
+    console.error("Error generating CSV:", err);
   }
 };
 
@@ -67,21 +78,21 @@ export const logErrorOutput = async (result, fileName, format) => {
       console.log(table.toString());
       resolve();
     });
-  if (format === "csv")
-    writeToCsv(fileName, result);
-
+    if (format === "csv")
+      await writeToCsv(fileName, result);
   }
 };
 
 // Function to extract Java client output if the spectral linter shows no errors
 export const extractJavaClientOutput = async (javaClientOutput, fileName, format) => {
   console.log(javaClientOutput);
-  // to convert to a csv file
+  // Convert to a CSV-compatible structure
   const result = javaClientOutput.split("\n").map((line) => {
     const [id, ...errorMessage] = line.split(/\s+/);
-    return { code: id,  message: errorMessage.join(" "), path: "" };
+    return { code: id, message: errorMessage.join(" "), path: "" };
   });
+
   // Write to CSV
   if (format === "csv")
-  writeToCsv(fileName, result);
+    await writeToCsv(fileName, result);
 };
