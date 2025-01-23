@@ -142,8 +142,7 @@ export const validateDefinition = async (
             " this API definition.\n"
           );
         }
-        //writeToCsv(fileName,result);
-        await logErrorOutput(result,fileName,format);
+        await logErrorOutput(result, fileName, format);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -156,13 +155,11 @@ export const validateDefinition = async (
         console.log(
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
-        //writeToCsv(fileName,javaClientStdout);
-        extractJavaClientOutput(javaClientStdout,fileName,format)
+        extractJavaClientOutput(javaClientStdout, fileName, format)
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
-          //writeToCsv(fileName,result);
-          await logErrorOutput(result,fileName,format);
+          await logErrorOutput(result, fileName, format);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));
@@ -250,8 +247,7 @@ export const validateDefinition = async (
             " this API definition.\n"
           );
         }
-        //writeToCsv(fileName,result);
-        await logErrorOutput(result,fileName,format);
+        await logErrorOutput(result, fileName, format);
 
         console.log(chalk.green.bold("\nValidation Passed\n"));
       } else {
@@ -264,14 +260,12 @@ export const validateDefinition = async (
         console.log(
           chalk.blue("\nAPI Manager Backend validation results : \n")
         );
-        //writeToCsv(fileName,javaClientStdout);
-        extractJavaClientOutput(javaClientStdout,fileName,format)
+        extractJavaClientOutput(javaClientStdout, fileName, format)
 
 
         if (result.length > 0) {
           console.log(chalk.blue("\nLinter validation results : \n"));
-          //writeToCsv(fileName,result);
-          await logErrorOutput(result,fileName,format);
+          await logErrorOutput(result, fileName, format);
         }
 
         console.log(chalk.red.bold("\nValidation Failed\n"));

@@ -1,6 +1,6 @@
 {
   "name": "swagger-linter_420",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "Validate Swagger or OpenAPI definitions as per WSO2 API Manager 4.2.0",
   "main": "index.js",
   "bin": {
@@ -25,12 +25,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@json2csv/node": "^7.0.6",
     "@stoplight/spectral-core": "^1.16.0",
     "@stoplight/spectral-rulesets": "^1.14.1",
     "chalk": "^5.2.0",
     "child_process": "^1.0.2",
     "cli-table": "^0.3.11",
-    "commander": "^10.0.0",
-    "json2csv": "^6.0.0-alpha.2"
+    "commander": "^10.0.0"
   }
 }

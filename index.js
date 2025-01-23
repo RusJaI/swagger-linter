@@ -38,7 +38,7 @@ const {
 
 // Check if the validation level is valid
 const level = parseInt(validationLevel);
-const formatValue = format+"";
+const formatValue = format + "";
 if (level !== 1 && level !== 2) {
     console.error(
         chalk.red.bold("Error: ") +
@@ -53,7 +53,7 @@ if (swaggerFile !== "" && swaggerDirectory === "") {
     // Load API specification file that was provided as a command line argument
     try {
         let apiDefinition = fs.readFileSync(swaggerFile, "utf-8");
-          validateDefinition(apiDefinition, swaggerFile, level ,formatValue);
+          validateDefinition(apiDefinition, swaggerFile, level, formatValue);
 
     } catch (err) {
         if (err.code === "ENOENT") {
