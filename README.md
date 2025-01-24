@@ -6,10 +6,10 @@ You can validate API definition(s) using either validation level 1 or 2;
 - **Validation level 1**: validate API definition(s) as in WSO2 API Manager 4.2.0 when Relaxed Validation enabled
 - **Validation level 2**: validate API definition(s) as in WSO2 API Manager 4.2.0
 
-If you need to get validation results in to CSV file;
-- add the following argument in the command line
-  `--format csv`
-  
+
+For more information on this visit the blog post :
+[Validating OpenAPI Definitions for WSO2 API Manager 4.2.0 with Swagger Linter 420](https://medium.com/@rusirij/validating-openapi-definitions-for-wso2-api-manager-4-2-0-with-swagger-linter-420-7a1e72f58bda)
+
 ## If you are building the source code and use this
 
 Use Node version 16
@@ -22,7 +22,7 @@ Clone this repo and run the following commnds
 
 Validate provided Swagger or OpenAPI definition
 
-`swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2] --format [csv]`
+`swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2]`
 
 or
 
@@ -51,3 +51,15 @@ Open a terminal in your working directory. Follow the below steps using node ver
     ii. If you are validating a directory of openAPI files :
 
         swagger-linter_420 -d [path to directory with API definitions] -l [validation level 1 or 2]
+
+## Release Notes
+
+  - ### Version 1.0.7
+    From version 1.0.7 onwards, you can use the following argument to export validation results into a CSV file: 
+        
+      `--format csv`
+
+    ##### Usage Example 
+    To run the tool and save the results in a CSV file, use the command format as follows :
+            
+          swagger-linter_420 -f [path to API definition JSON or YAML] -l [validation level 1 or 2] --format csv
